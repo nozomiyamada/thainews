@@ -1,46 +1,37 @@
-"""
-@author: Nozomi
-"""
+import json
+import re
+import os
+from bs4 import BeautifulSoup
+import collections
+import numpy as np
+from glob import glob
+from pythainlp import word_tokenize
 from gensim.models import word2vec
 from gensim.models import KeyedVectors
 
-import csv
-import random
-import numpy as np
-import pandas as pd
-import matplotlib as mpl
-import warnings
-warnings.filterwarnings('ignore')
-#font = {"family":"TH Sarabun New"}
-#font = {"family":"Ayuthaya"}
-font = {"family":"Dejavu Suns"}
-mpl.rc('font', **font)
-import matplotlib.pyplot as plt
-import pylab as plb
-from pythainlp.tokenize import word_tokenize
-from sklearn.linear_model import LinearRegression
-lr = LinearRegression()
+def make_model(text_file='/Users/Nozomi/files/news/thairath/json/cat.txt', skipgram=0, epoch=3):
+    if skipgram == 0:
+        save_name = text_file.rsplit('/', 1)[0] + '/cbow'
+    else:
+        save_name = text_file.rsplit('/', 1)[0] + '/skip'
+    sentences = word2vec.LineSentence(text_file)
+    model = word2vec.Word2Vec(sentences, sg=skipgram, size=300, min_count=5, window=5, iter=epoch)  # CBOW: sg=0, skip-gram: sg=1
+    model.save(save_name+'.model')
+    model.wv.save_word2vec_format(save_name+'.bin', binary=True)
 
-    
-def tokenize(start_index, end_index, open_tsv, write_txt):
-    """
-    tokenize headline (line[1]) & article (line[-1])
-    save as txt with whitespace
-    """
-    open_file = open(open_tsv, 'r', encoding='utf-8')
-    write_file = open(write_txt, 'a', encoding='utf-8')  # append mode
-    lines = list(csv.reader(open_file, delimiter='\t'))
-    writer = csv.writer(write_file, lineterminator='\n', delimiter=' ')
-    
-    for line in lines[start_index: end_index]:
+class Word2Vector:
+    def __init__(self):
+        self.model = None
+        self.vocab = []
 
-        headline = word_tokenize(line[1], whitespaces=True)
-        writer.writerow(headline)
-        article = word_tokenize(line[-1], whitespaces=True)
-        writer.writerow(article)
+WV = Word2Vector()
 
-    open_file.close()
-    write_file.close()
+def load_model(skipgram=False):
+    if skipgram:
+        WV.model = word2vec.Word2Vec.load('/Users/Nozomi/files/news/thairath/json/skip.model')
+    else:
+        WV.model = word2vec.Word2Vec.load('/Users/Nozomi/files/news/thairath/json/cbow.model')
+    WV.vocab = list(self.model.wv.vocab.keys())
 
 def cos_sim(v1, v2):
     return round(float(np.dot(v1, v2)) / (norm(v1) * norm(v2)), 4)
@@ -55,17 +46,6 @@ def mahalanobis(vectors):
     inv_matrix = np.linalg.inv(cov_matrix)
     mahal_dis = list(map(lambda vec: np.sqrt(np.dot(np.dot(vec, inv_matrix), vec.T)), deviation_vec))
     return mahal_dis
-
-def make_model(text_file='tokenized.tsv', save_name='skip', skipgram=1, epoch=5):
-    sentences = word2vec.LineSentence(text_file)
-    model = word2vec.Word2Vec(sentences, sg=skipgram, size=300, min_count=5, window=10, iter=epoch)  # CBOW: sg=0, skip-gram: sg=1
-    model.save(save_name+'.model')
-    model.wv.save_word2vec_format(save_name+'.bin', binary=True)
-
-def train(model_file='cbow.model', epoch=1):
-    model = word2vec.Word2Vec.load(model_file)
-    sentences = word2vec.LineSentence('./only_word.txt　')
-    model.train(sentences, total_examples=1035846, epochs=epoch)
 
 
 class Metonymy:
@@ -82,7 +62,7 @@ class Metonymy:
     def sim(self, word, n=10):
         results = self.model.wv.most_similar(positive=[word], topn=n)
         for result in results:
-           print(result[0], round(result[1], 4))
+        print(result[0], round(result[1], 4))
     
     # calculate similarity & distance of two words
     def sim_two(self, word1, word2):
