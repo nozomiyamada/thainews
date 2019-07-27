@@ -19,25 +19,35 @@ def make_model(text_file='/Users/Nozomi/files/news/thairath/json/cat.txt', skipg
     model.save(save_name+'.model')
     model.wv.save_word2vec_format(save_name+'.bin', binary=True)
 
+def cos_sim(v1, v2):
+    return round(float(np.dot(v1, v2)) / (norm(v1) * norm(v2)), 4)
+
+def norm(vector):
+    return round(np.linalg.norm(vector), 4)
+
 class Word2Vector:
     def __init__(self):
         self.model = None
         self.vocab = []
 
-WV = Word2Vector()
+    # one word > vector
+    def vec(self, word):
+        return self.model.wv[word]
+
+WV = Word2Vector()  # instance
 
 def load_model(skipgram=False):
     if skipgram:
         WV.model = word2vec.Word2Vec.load('/Users/Nozomi/files/news/thairath/json/skip.model')
     else:
         WV.model = word2vec.Word2Vec.load('/Users/Nozomi/files/news/thairath/json/cbow.model')
-    WV.vocab = list(self.model.wv.vocab.keys())
+    WV.vocab = list(WV.model.wv.vocab.keys())
 
-def cos_sim(v1, v2):
-    return round(float(np.dot(v1, v2)) / (norm(v1) * norm(v2)), 4)
-
-def norm(vector):
-    return round(np.linalg.norm(vector), 4)
+# search most similar n words
+def sim(word, n=10):
+    results = WV.model.wv.most_similar(positive=[word], topn=n)
+    for result in results:
+        print(result[0], round(result[1], 4))
 
 def mahalanobis(vectors):
     mean_vec = np.mean(vectors, axis=0)
@@ -47,6 +57,13 @@ def mahalanobis(vectors):
     mahal_dis = list(map(lambda vec: np.sqrt(np.dot(np.dot(vec, inv_matrix), vec.T)), deviation_vec))
     return mahal_dis
 
+# calculate similarity & distance of two words
+def sim_two(word1, word2):
+    return cos_sim(WV.vec(word1), WV.vec(word2))
+
+
+
+
 
 class Metonymy:
 
@@ -54,19 +71,7 @@ class Metonymy:
         self.model = word2vec.Word2Vec.load(model)
         self.vocab = list(self.model.wv.vocab.keys())
     
-    # one word > vector
-    def vec(self, word):
-        return self.model.wv[word]
     
-    # search most similar n words
-    def sim(self, word, n=10):
-        results = self.model.wv.most_similar(positive=[word], topn=n)
-        for result in results:
-        print(result[0], round(result[1], 4))
-    
-    # calculate similarity & distance of two words
-    def sim_two(self, word1, word2):
-        return cos_sim(self.vec(word1), self.vec(word2)), norm(self.vec(word1) - self.vec(word2))
 
     # return similarity of random two words
     def sim_two_word_random(self):
@@ -327,9 +332,4 @@ class Metonymy:
         open_file.close()
         vec_file.close()
         label_file.close()
-        
-        
-# instantiaion
-met1 = Metonymy('cbow.model')  # CBOW
-met2 = Metonymy('skip.model')  # skip-gram
 
