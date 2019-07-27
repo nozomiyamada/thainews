@@ -7,7 +7,7 @@ import os
 from bs4 import BeautifulSoup
 import collections
 import numpy as np
-from glob import glob
+import glob
 from pythainlp import word_tokenize
 from gensim.models import word2vec
 from gensim.models import KeyedVectors
@@ -68,14 +68,13 @@ def scrape(start_id, end_id):
 
 class News:
 
-    ### instance: tr.method
-
     def __init__(self, newspaper='thairath'):
         self.newspaper = newspaper  # publisher: thairath, matichon, dailynews ...
         self.dic = {}  # loaded json file
         self.opened = False  # opened file yet or not
         self.path = ''  # path of json file
         self.file_name = ''  # name of json file
+        self.word_freq = None  # word frequency
 
     def check_open(self):
         assert self.opened, 'open json file first: tr.open(n[10k])'
@@ -152,7 +151,7 @@ def text_trim(text:str):
     text = text.replace('\u200b', '')
     text = text.replace('\xa0', ' ')
     text = re.sub(' +', ' ', text)
-    text = re.sub('[\'\"‘’“”`]', '', text)
+    text = re.sub('[\'\"‘’“”\)\(`]', '', text)
     return text.strip(' ')
 
 def tokenize(text:str):
@@ -169,5 +168,15 @@ def output():
             for id in TR.ids:
                 for seq in tokenize(article(id)):
                     f.write(' '.join(seq) + '\n')
+
+def word_freq(top_n=100):
+    files = glob.glob('/Users/Nozomi/files/news/thairath/json/*.txt')  # open tokenized files
+    count = collections.Counter()
+    for file in files:
+        with open(file, 'r') as f:
+            for word in f.read().replace('\n', ' ').split():
+                count[word] += 1
+    for tpl in count.most_common(top_n):
+        print(tpl[0], tpl[1])
 
 ######################################################################
