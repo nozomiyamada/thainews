@@ -62,8 +62,7 @@ def sim_two(word1, word2):
     return cos_sim(WV.vec(word1), WV.vec(word2))
 
 
-
-
+####### OLD CODE ###############################
 
 class Metonymy:
 

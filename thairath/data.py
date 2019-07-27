@@ -178,5 +178,8 @@ def word_freq(top_n=100):
                 count[word] += 1
     for tpl in count.most_common(top_n):
         print(tpl[0], tpl[1])
+    with open('freq.txt', 'w') as f:
+        for tpl in count.most_common():
+            f.write(tpl[0]+ ' ' + str(tpl[1]) + '\n')
 
 ######################################################################
