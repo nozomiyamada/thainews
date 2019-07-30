@@ -70,8 +70,6 @@ class Metonymy:
         self.model = word2vec.Word2Vec.load(model)
         self.vocab = list(self.model.wv.vocab.keys())
     
-    
-
     # return similarity of random two words
     def sim_two_word_random(self):
         words = random.sample(self.vocab, 2)

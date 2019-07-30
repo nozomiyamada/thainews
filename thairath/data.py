@@ -171,15 +171,15 @@ def output():
 
 def word_freq(top_n=100):
     files = glob.glob('/Users/Nozomi/files/news/thairath/json/*.txt')  # open tokenized files
-    count = collections.Counter()
+    TR.word_freq = collections.Counter()
     for file in files:
         with open(file, 'r') as f:
             for word in f.read().replace('\n', ' ').split():
-                count[word] += 1
-    for tpl in count.most_common(top_n):
+                TR.word_freq[word] += 1
+    for tpl in TR.word_freq.most_common(top_n):
         print(tpl[0], tpl[1])
     with open('freq.txt', 'w') as f:
-        for tpl in count.most_common():
+        for tpl in TR.word_freq.most_common():
             f.write(tpl[0]+ ' ' + str(tpl[1]) + '\n')
 
 ######################################################################
