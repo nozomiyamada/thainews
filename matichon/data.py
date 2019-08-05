@@ -9,8 +9,8 @@ import collections
 import numpy as np
 import glob
 from pythainlp import word_tokenize
-from pythainlp import corpus
-import matplotlib.pyplot as plt
+from gensim.models import word2vec
+from gensim.models import KeyedVectors
 
 # all contents of Thairath are https://www.thairath.co.th/content/******* (7digits)
 
@@ -25,41 +25,38 @@ def return_str(text):
     else:
         return text_trim(text)
 
-url = 'https://www.thairath.co.th/content/'
-
-
 ##### function for scraping #####
+"""
+content is in <div class="td-main-content-wrap"> -> <article>
 
-def scrape(start_id, end_id):
+"""
+
+
+def scrape(start_id, end_id):  # 7 digits
     
-    json_name = '/Users/Nozomi/files/news/thairath/json/thairath0{}-0{}.json'.format(start_id, end_id)
+    json_name = '/Users/Nozomi/files/news/matichon/json/matichon{}-{}.json'.format(start_id, end_id)
 
     file = open(json_name, 'w', encoding='utf-8')
 
     all_dic = {}
 
     for article_id in range(start_id, end_id):
-        response = requests.get(url + str(article_id))  # get html
-        if response.status_code == 200:  # if 404 pass
+        response = requests.get('https://www.matichon.co.th/news/' + str(article_id))  # get html
+        if response.status_code != 200:
+            continue
+        else:
             soup = BeautifulSoup(response.text, "html.parser")  # get text
-
-            # find more than 2 tags <script>
-            content_list = soup.find_all('script', type="application/ld+json")
-
-            # convert final one from json into dict
-            try:
-                content_dic = json.loads(content_list[-1].text)
-            except IndexError:
-                continue  # no content -> skip to next id
-            
-            if len(str(article_id)) < 7: # make all id have 7 digits  e.g. 123 -> 0000123
-                id7 = '0'*(7-len(str(article_id)))+str(article_id)
+            if soup.find('article') == None:
+                continue
             else:
-                id7 = str(article_id)
+                headline = soup.find('h1', class_="entry-title").text
+                article = '\n'.join([i.text for i in soup.find('article').find_all('p') if i.text not in ['', '\xa0']])
+                date = soup.find('article').find('time').get('datetime')
+                article_url = response.url
+                category = article_url.split('/')[-2]
 
-            all_dic[id7] = {'headline':content_dic['headline'], 'description':content_dic['description'],
-            'article':content_dic['articleBody'], 'date':content_dic['datePublished'], 'url':content_dic['mainEntityOfPage']['@id']}
-    
+                all_dic[str(article_id)] = {"headline":headline, "article":article, "date":date,
+                "category":category, "url":article_url}
     json.dump(all_dic, file, indent=4, ensure_ascii=False)
     file.close()
 
@@ -77,7 +74,7 @@ class News:
         self.word_freq = None  # word frequency
 
     def check_open(self):
-        assert self.opened, 'open json file first: tr.open(n[10k])'
+        assert self.opened, 'open json file first: mc.open(n[10k])'
 
     def add_zero(self, article_id):
         # 5003 -> 0005003 (7 digits) 
@@ -86,7 +83,7 @@ class News:
     def open(self, start_id:int):  # start_id = n (* 10000)
         start = '0'*(3-len(str(start_id))) + '{}0001'.format(start_id)
         end = self.add_zero(int(start) + 9999)
-        self.path = '/Users/Nozomi/files/news/thairath/json/thairath{}-{}.json'.format(start, end)
+        self.path = '/Users/Nozomi/files/news/matichon/json/matichon{}-{}.json'.format(start, end)
         self.file_name = self.path.rsplit('/')[-1]
         
         with open(self.path, 'r') as f:
@@ -100,46 +97,46 @@ class News:
         assert self.add_zero(article_id) in self.ids, 'no article id'
         return self.add_zero(article_id)
 
-TR = News()  # instance
+MC = News()  # instance
 
 ##############################################################################
 
 def load(start_id:int):  # start_id = n (* 10000)
-    TR.open(start_id)
+    MC.open(start_id)
 
 def article(article_id):
-    TR.check_open()
-    article_id = TR.id_check(article_id)
-    return TR.dic[article_id]['article']
+    MC.check_open()
+    article_id = MC.id_check(article_id)
+    return MC.dic[article_id]['article']
 
 def date(article_id):
-    TR.check_open()
-    article_id = TR.id_check(article_id)
-    return TR.dic[article_id]['date']
+    MC.check_open()
+    article_id = MC.id_check(article_id)
+    return MC.dic[article_id]['date']
 
 def all_date(self):
-    TR.check_open()
+    MC.check_open()
     date = set()
     for id in self.ids:
-        date.add(TR.dic[id]['date'].split('T')[0])
+        date.add(MC.dic[id]['date'].split('T')[0])
     return date
 
 def headline(article_id, print_text=False):
-    TR.check_open()
-    article_id = TR.id_check(article_id)
+    MC.check_open()
+    article_id = MC.id_check(article_id)
     if print_text:
         print()
-    return TR.dic[article_id]['headline']
+    return MC.dic[article_id]['headline']
 
-def description(article_id):
-    TR.check_open()
-    article_id = TR.id_check(article_id)
-    return TR.dic[article_id]['description']
+def category(article_id):
+    MC.check_open()
+    article_id = MC.id_check(article_id)
+    return MC.dic[article_id]['category']
 
 def url(article_id):
-    TR.check_open()
-    article_id = TR.id_check(article_id)
-    return TR.dic[article_id]['url']
+    MC.check_open()
+    article_id = MC.id_check(article_id)
+    return MC.dic[article_id]['url']
 
 #################################################################
 
@@ -151,7 +148,7 @@ def text_trim(text:str):
     text = text.replace('\u200b', '')
     text = text.replace('\xa0', ' ')
     text = re.sub(' +', ' ', text)
-    text = re.sub(r'[\'\"‘’“”\)\(`]', '', text)
+    text = re.sub('[\'\"‘’“”\)\(`]', '', text)
     return text.strip(' ')
 
 def tokenize(text:str):
@@ -159,42 +156,27 @@ def tokenize(text:str):
     seqs = [text_trim(seq) for seq in text.split('\n')]
     return [word_tokenize(seq, keep_whitespace=False) for seq in seqs if seq !='' and seq != ' '] 
 
-def output(overwrite=False):
-    path = TR.path.replace('.json', '.txt')
-    if os.path.exists(path) and not overwrite:
+def output():
+    path = MC.path.replace('.json', '.txt')
+    if os.path.exists(path):
         print('file exists')
     else:
         with open(path, 'w', encoding='utf-8') as f:
-            for id in TR.ids:
+            for id in MC.ids:
                 for seq in tokenize(article(id)):
                     f.write(' '.join(seq) + '\n')
 
 def word_freq(top_n=100):
-    files = glob.glob('/Users/Nozomi/files/news/thairath/json/*.txt')  # open tokenized files
-    TR.word_freq = collections.Counter()
+    files = glob.glob('/Users/Nozomi/files/news/matichon/json/*.txt')  # open tokenized files
+    MC.word_freq = collections.Counter()
     for file in files:
         with open(file, 'r') as f:
             for word in f.read().replace('\n', ' ').split():
-                TR.word_freq[word] += 1
-    for tpl in TR.word_freq.most_common(top_n):
+                MC.word_freq[word] += 1
+    for tpl in MC.word_freq.most_common(top_n):
         print(tpl[0], tpl[1])
-    with open('freq.csv', 'w') as f:
-        writer = csv.writer(f, delimiter=',', lineterminator='\n')
-        for tpl in TR.word_freq.most_common():
-            writer.writerow(tpl)
-
-def zipf(n=10000, remove_stop=False):
-    with open('freq.csv' ,'r') as f:
-        words = csv.reader(f, delimiter=',')
-        if remove_stop:
-            y = [int(word[-1]) for word in words if word[0] not in corpus.thai_stopwords()][:n]
-        else:
-            y = [int(word[-1]) for word in words][:n]
-        plt.plot(range(len(y)), y)
-        plt.xscale('log')
-        plt.yscale('log')
-        plt.show()
-
-
+    with open('freq.txt', 'w') as f:
+        for tpl in MC.word_freq.most_common():
+            f.write(tpl[0]+ ' ' + str(tpl[1]) + '\n')
 
 ######################################################################
