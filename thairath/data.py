@@ -11,8 +11,6 @@ import glob
 from pythainlp import word_tokenize
 from pythainlp import corpus
 import matplotlib.pyplot as plt
-from gensim.models import word2vec
-from gensim.models import KeyedVectors
 
 # all contents of Thairath are https://www.thairath.co.th/content/******* (7digits)
 
