@@ -9,6 +9,8 @@ import collections
 import numpy as np
 import glob
 from pythainlp import word_tokenize
+from pythainlp import corpus
+import matplotlib.pyplot as plt
 from gensim.models import word2vec
 from gensim.models import KeyedVectors
 
@@ -151,7 +153,7 @@ def text_trim(text:str):
     text = text.replace('\u200b', '')
     text = text.replace('\xa0', ' ')
     text = re.sub(' +', ' ', text)
-    text = re.sub('[\'\"‘’“”\)\(`]', '', text)
+    text = re.sub(r'[\'\"‘’“”\)\(`]', '', text)
     return text.strip(' ')
 
 def tokenize(text:str):
@@ -159,9 +161,9 @@ def tokenize(text:str):
     seqs = [text_trim(seq) for seq in text.split('\n')]
     return [word_tokenize(seq, keep_whitespace=False) for seq in seqs if seq !='' and seq != ' '] 
 
-def output():
+def output(overwrite=False):
     path = TR.path.replace('.json', '.txt')
-    if os.path.exists(path):
+    if os.path.exists(path) and not overwrite:
         print('file exists')
     else:
         with open(path, 'w', encoding='utf-8') as f:
@@ -178,8 +180,23 @@ def word_freq(top_n=100):
                 TR.word_freq[word] += 1
     for tpl in TR.word_freq.most_common(top_n):
         print(tpl[0], tpl[1])
-    with open('freq.txt', 'w') as f:
+    with open('freq.csv', 'w') as f:
+        writer = csv.writer(f, delimiter=',', lineterminator='\n')
         for tpl in TR.word_freq.most_common():
-            f.write(tpl[0]+ ' ' + str(tpl[1]) + '\n')
+            writer.writerow(tpl)
+
+def zipf(n=10000, remove_stop=False):
+    with open('freq.csv' ,'r') as f:
+        words = csv.reader(f, delimiter=',')
+        if remove_stop:
+            y = [int(word[-1]) for word in words if word[0] not in corpus.thai_stopwords()][:n]
+        else:
+            y = [int(word[-1]) for word in words][:n]
+        plt.plot(range(len(y)), y)
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.show()
+
+
 
 ######################################################################
