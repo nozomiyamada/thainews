@@ -62,8 +62,9 @@ def matichon(start_id, end_id):  # 7 digits
                 date = soup.find('article').find('time').get('datetime')
                 article_url = response.url
                 category = article_url.split('/')[-2]
+                id7 = '0'*(7-len(str(article_id))) + str(article_id) 
 
-                all_dic[str(article_id)] = {"headline":headline, "article":article, "date":date,
+                all_dic[id7] = {"headline":headline, "article":article, "date":date,
                 "category":category, "url":article_url}
     json.dump(all_dic, file, indent=4, ensure_ascii=False)
     file.close()
@@ -97,8 +98,9 @@ def dailynews(start_id, end_id, category=None):  # 6 digits
                 article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
                 date = soup.find('meta', property="article:published_time").get('content')
                 article_url = response.url
-
-                all_dic[str(article_id)] = {"headline":headline, "description": description, "article":article, "date":date,
+                id6 = '0'*(6-len(str(article_id))) + str(article_id) 
+                
+                all_dic[id6] = {"headline":headline, "description": description, "article":article, "date":date,
                 "category":category, "url":article_url}
     json.dump(all_dic, file, indent=4, ensure_ascii=False)
     file.close()
