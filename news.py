@@ -1,10 +1,8 @@
-import requests
 import csv
 import json
 import html
 import re
 import os
-from bs4 import BeautifulSoup
 import collections
 import numpy as np
 import glob
@@ -161,7 +159,6 @@ class News:
             plt.xscale('log')
             plt.yscale('log')
             plt.show()
-
 
 tr = News('thairath')
 mc = News('matichon')
