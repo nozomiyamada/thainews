@@ -3,6 +3,7 @@ from pythainlp import word_tokenize, corpus
 from gensim.models import word2vec
 import requests
 import json
+import csv
 
 url = 'https://www.siamzone.com/music/thailyric/' # + id 5 digits
 
@@ -37,6 +38,8 @@ def tokenize(lyrics):
     return tokens
 
 def make_txt():
+    with open('siamzone.json', 'r') as f:
+        data = json.load(f)
     with open('siamzone.txt', 'w') as f:
         ids = data.keys()
         writer = csv.writer(f, delimiter=' ', lineterminator='\n')
