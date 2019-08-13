@@ -2,10 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
+def add_zero(number:int, digits=7):
+    return '0'*(digits-len(str(number))) + str(number)
+
 def thairath(start_id, end_id):  # 7 digits
-    assert len(str(start_id)) == 7 and len(str(end_id)) == 7, 'id must have 7 digits'
     # open json file
-    json_name = '/Users/Nozomi/files/news/thairath/json/thairath0{}-0{}.json'.format(start_id, end_id)
+    json_name = '/Users/Nozomi/files/news/thairath/json/thairath{}-{}.json'.format(add_zero(start_id), add_zero(end_id- 1))
     file = open(json_name, 'w', encoding='utf-8')
 
     # dictionary: {id: content} - saved as json
@@ -39,9 +41,8 @@ def thairath(start_id, end_id):  # 7 digits
 
 
 def matichon(start_id, end_id):  # 7 digits
-    assert len(str(start_id)) == 7 and len(str(end_id)) == 7, 'id must have 7 digits'
     # open json file
-    json_name = '/Users/Nozomi/files/news/matichon/json/matichon{}-{}.json'.format(start_id, end_id)
+    json_name = '/Users/Nozomi/files/news/matichon/json/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
     file = open(json_name, 'w', encoding='utf-8')
 
     # dictionary: {id: content} - saved as json
