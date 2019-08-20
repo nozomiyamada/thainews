@@ -73,11 +73,10 @@ def matichon(start_id, end_id):  # 7 digits
 def dailynews(start_id, end_id, category=None):  # 6 digits
     category_list = ['politics', 'regional', 'entertainment', 'economic', 'crime', 'foreign', 'royalnews',
     'women', 'education', 'bangkok', 'it', 'agriculture', 'sports']
-    assert len(str(start_id)) == 6 and len(str(end_id)) == 6, 'id must have 6 digits'
     assert category in category_list, 'must choose category: {}'.format(' '.join(category_list))
 
     # open json file
-    json_name = '/Users/Nozomi/files/news/dailynews/json/dailynews_{}{}-{}.json'.format(category, start_id, end_id)
+    json_name = '/Users/Nozomi/files/news/dailynews/json/dailynews_{}{}-{}.json'.format(category, add_zero(start_id, 6), add_zero(end_id, 6))
     file = open(json_name, 'w', encoding='utf-8')
 
     # dictionary: {id: content} - saved as json
