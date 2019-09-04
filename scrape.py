@@ -42,7 +42,7 @@ def thairath(start_id, end_id):  # 7 digits
 
 def matichon(start_id, end_id):  # 7 digits
     # open json file
-    json_name = '/Users/Nozomi/files/news/matichon/json/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
+    json_name = '/Users/Nozomi/files/news/matichon/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
     file = open(json_name, 'w', encoding='utf-8')
 
     # dictionary: {id: content} - saved as json
@@ -76,7 +76,7 @@ def dailynews(start_id, end_id, category=None):  # 6 digits
     assert category in category_list, 'must choose category: {}'.format(' '.join(category_list))
 
     # open json file
-    json_name = '/Users/Nozomi/files/news/dailynews/json/dailynews_{}{}-{}.json'.format(category, add_zero(start_id, 6), add_zero(end_id, 6))
+    json_name = '/Users/Nozomi/files/news/dailynews/dailynews_{}{}-{}.json'.format(category, add_zero(start_id, 6), add_zero(end_id, 6))
     file = open(json_name, 'w', encoding='utf-8')
 
     # dictionary: {id: content} - saved as json
@@ -85,6 +85,38 @@ def dailynews(start_id, end_id, category=None):  # 6 digits
     # scraping
     for article_id in range(int(start_id), int(end_id)):
         response = requests.get('https://www.dailynews.co.th/{}/'.format(category) + str(article_id))
+        if response.status_code != 200:
+            continue
+        else:
+            soup = BeautifulSoup(response.text, "html.parser")  # get html
+            content = soup.find('article', id="news-article")
+            if content == None:
+                continue
+            else:
+                headline = content.find('h1', class_='title').text
+                description = content.find('p', class_='desc').text
+                article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
+                date = soup.find('meta', property="article:published_time").get('content')
+                article_url = response.url
+                id6 = '0'*(6-len(str(article_id))) + str(article_id) 
+                
+                all_dic[id6] = {"headline":headline, "description": description, "article":article, "date":date,
+                "category":category, "url":article_url}
+    json.dump(all_dic, file, indent=4, ensure_ascii=False)
+    file.close()
+
+
+def sanook(start_id, end_id):  # 6 digits
+    # open json file
+    json_name = '/Users/Nozomi/files/news/sanook/dailynews_{}-{}.json'.format(add_zero(start_id, 7), add_zero(end_id, 7))
+    file = open(json_name, 'w', encoding='utf-8')
+
+    # dictionary: {id: content} - saved as json
+    all_dic = {}
+
+    # scraping
+    for article_id in range(int(start_id), int(end_id)):
+        response = requests.get('https://www.sanook.com/news/{}/' + str(article_id))
         if response.status_code != 200:
             continue
         else:
