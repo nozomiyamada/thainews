@@ -58,15 +58,18 @@ def matichon(start_id, end_id):  # 7 digits
             if soup.find('article') == None:
                 continue
             else:
-                headline = soup.find('h1', class_="entry-title").text
-                article = '\n'.join([i.text for i in soup.find('article').find_all('p') if i.text not in ['', '\xa0']])
-                date = soup.find('article').find('time').get('datetime')
-                article_url = response.url
-                category = article_url.split('/')[-2]
-                id7 = '0'*(7-len(str(article_id))) + str(article_id) 
+                try:
+                    headline = soup.find('h1', class_="entry-title").text
+                    article = '\n'.join([i.text for i in soup.find('article').find_all('p') if i.text not in ['', '\xa0']])
+                    date = soup.find('article').find('time').get('datetime')
+                    article_url = response.url
+                    category = article_url.split('/')[-2]
+                    id7 = '0'*(7-len(str(article_id))) + str(article_id) 
 
-                all_dic[id7] = {"headline":headline, "article":article, "date":date,
-                "category":category, "url":article_url}
+                    all_dic[id7] = {"headline":headline, "article":article, "date":date,
+                    "category":category, "url":article_url}
+                except:
+                    continue
     json.dump(all_dic, file, indent=4, ensure_ascii=False)
     file.close()
 
