@@ -1,11 +1,7 @@
-import csv
-import json
-import html
-import re
-import os
+import csv, json, html
+import re, os, glob
 import collections
 import numpy as np
-import glob
 from pythainlp import word_tokenize
 from pythainlp import corpus
 import matplotlib.pyplot as plt

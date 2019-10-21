@@ -42,7 +42,7 @@ def thairath(start_id, end_id):  # 7 digits
 
 def matichon(start_id, end_id):  # 7 digits
     # open json file
-    json_name = '/Users/Nozomi/files/news/matichon/json/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
+    json_name = '/Users/Nozomi/files/news/matichon/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
     file = open(json_name, 'w', encoding='utf-8')
 
     # dictionary: {id: content} - saved as json
