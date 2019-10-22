@@ -51,11 +51,11 @@ class News:
 
     def get_json(self):
         if self.__publisher == 'thairath':
-            return glob.glob('/Users/Nozomi/files/news/thairath/json/*.json')
+            return glob.glob('/Users/Nozomi/files/news/thairath/*.json')
         elif self.__publisher == 'matichon':
-            return glob.glob('/Users/Nozomi/files/news/matichon/json/*.json')
+            return glob.glob('/Users/Nozomi/files/news/matichon/*.json')
         elif self.__publisher == 'dailynews':
-            return glob.glob('/Users/Nozomi/files/news/dailynews/json/*.json')
+            return glob.glob('/Users/Nozomi/files/news/dailynews/*.json')
 
     def load(self, start_id:int):  # start_id = n (* 1000)
         start = '0'*(4-len(str(start_id))) + '{}001'.format(start_id)

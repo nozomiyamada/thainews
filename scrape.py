@@ -119,7 +119,7 @@ def sanook(start_id, end_id):  # 6 digits
 
     # scraping
     for article_id in range(int(start_id), int(end_id)):
-        response = requests.get('https://www.sanook.com/news/{}/' + str(article_id))
+        response = requests.get('https://www.sanook.com/news/' + str(article_id))
         if response.status_code != 200:
             continue
         else:
