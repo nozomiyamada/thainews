@@ -6,13 +6,7 @@ def add_zero(number:int, digits=7):
     return '0'*(digits-len(str(number))) + str(number)
 
 def thairath(start_id, end_id):  # 7 digits
-    # open json file
-    json_name = '/Users/Nozomi/files/news/thairath/json/thairath{}-{}.json'.format(add_zero(start_id), add_zero(end_id- 1))
-    file = open(json_name, 'w', encoding='utf-8')
-
-    # dictionary: {id: content} - saved as json
-    all_dic = {}
-
+    all_list = []
     # scraping
     for article_id in range(int(start_id), int(end_id)):
         response = requests.get('https://www.thairath.co.th/content/' + str(article_id))
@@ -25,19 +19,17 @@ def thairath(start_id, end_id):  # 7 digits
             # convert the final one from json into dict
             try:
                 content_dic = json.loads(content_list[-1].text)
-            except IndexError:
+            except:
                 continue  # no content -> skip for loop to next id
-            
-            if len(str(article_id)) < 7: # make id have 7 digits  e.g. 123 -> 0000123
-                id7 = '0'*(7-len(str(article_id)))+str(article_id)
-            else:
-                id7 = str(article_id)
 
-            all_dic[id7] = {'headline':content_dic['headline'], 'description':content_dic['description'],
-            'article':content_dic['articleBody'], 'date':content_dic['datePublished'], 'url':content_dic['mainEntityOfPage']['@id']}
-    
-    json.dump(all_dic, file, indent=4, ensure_ascii=False)
-    file.close()
+            dic = {'headline':content_dic['headline'], 'description':content_dic['description'],
+            'article':content_dic['articleBody'], 'date':content_dic['datePublished'], 'id':str(article_id), 'url':content_dic['mainEntityOfPage']['@id']}
+            all_list.append(dic)
+
+    # open json file
+    json_name = '/Users/Nozomi/files/news/thairath/json/thairath{}-{}.json'.format(add_zero(start_id), add_zero(end_id- 1))
+    with open(json_name, 'w', encoding='utf-8') as f:
+        json.dump(all_list, f, indent=4, ensure_ascii=False)
 
 
 def matichon(start_id, end_id):  # 7 digits
