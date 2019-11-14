@@ -38,15 +38,15 @@ def matichon(start_id, end_id):  # 7 digits
 
     # scraping
     for article_id in range(int(start_id), int(end_id)):
-        response = requests.get('https://www.matichon.co.th/news/' + str(article_id))
-        if response.status_code != 200:
-            continue
-        else:
-            soup = BeautifulSoup(response.text, "html.parser")  # get html
-            if soup.find('article') == None:
+        try:
+            response = requests.get('https://www.matichon.co.th/news/' + str(article_id))
+            if response.status_code != 200:
                 continue
             else:
-                try:
+                soup = BeautifulSoup(response.text, "html.parser")  # get html
+                if soup.find('article') == None:
+                    continue
+                else:
                     headline = soup.find('h1', class_="entry-title").text
                     article = '\n'.join([i.text for i in soup.find('article').find_all('p') if i.text not in ['', '\xa0']])
                     date = soup.find('article').find('time').get('datetime')
@@ -63,8 +63,9 @@ def matichon(start_id, end_id):  # 7 digits
                         "id":id7
                         }
                     all_list.append(dic)
-                except:
-                    continue
+        except:
+            continue
+        
     # open json file
     json_name = '/Users/Nozomi/files/news/matichon/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
     with open(json_name, 'w', encoding='utf-8') as f:

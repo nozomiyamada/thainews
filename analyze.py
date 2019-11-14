@@ -24,7 +24,7 @@ def text_trim(text:str):
     text = text.replace('\r', '')
     text = text.replace('\u200b', '')
     text = text.replace('\xa0', ' ')
-    text = re.sub(' +', ' ', text)
+    text = re.sub(r' +', ' ', text)
     text = re.sub(r'[\'\"‘’“”`\)\(]', '', text)
     return text.strip(' ')
 
