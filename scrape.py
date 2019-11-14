@@ -33,12 +33,8 @@ def thairath(start_id, end_id):  # 7 digits
 
 
 def matichon(start_id, end_id):  # 7 digits
-    # open json file
-    json_name = '/Users/Nozomi/files/news/matichon/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
-    file = open(json_name, 'w', encoding='utf-8')
-
     # dictionary: {id: content} - saved as json
-    all_dic = {}
+    all_list = []
 
     # scraping
     for article_id in range(int(start_id), int(end_id)):
@@ -58,12 +54,22 @@ def matichon(start_id, end_id):  # 7 digits
                     category = article_url.split('/')[-2]
                     id7 = '0'*(7-len(str(article_id))) + str(article_id) 
 
-                    all_dic[id7] = {"headline":headline, "article":article, "date":date,
-                    "category":category, "url":article_url}
+                    dic = {
+                        "headline":headline,
+                        "article":article,
+                        "date":date,
+                        "category":category,
+                        "url":article_url,
+                        "id":id7
+                        }
+                    all_list.append(dic)
                 except:
                     continue
-    json.dump(all_dic, file, indent=4, ensure_ascii=False)
-    file.close()
+    # open json file
+    json_name = '/Users/Nozomi/files/news/matichon/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
+    with open(json_name, 'w', encoding='utf-8') as f:
+        json.dump(all_list, f, indent=4, ensure_ascii=False)
+
 
 def dailynews(start_id, end_id, category=None):  # 6 digits
     category_list = ['politics', 'regional', 'entertainment', 'economic', 'crime', 'foreign', 'royalnews',
