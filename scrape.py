@@ -98,13 +98,14 @@ def dailynews(start_id, end_id, category=None):  # 6 digits
                 article_url = response.url
                 id6 = '0'*(6-len(str(article_id))) + str(article_id) 
                 
-                all_list = {"headline":headline,"description": description, "article":article, "date":date,
-                "category":category, "id":str(article_id), "url":article_url}
+                dic = {"headline":headline,"description":description, "article":article, "date":date,
+                "category":category, "id":id6, "url":article_url}
+                all_list.append(dic)
     
     # open json file
     json_name = '/Users/Nozomi/news/dailynews/dailynews_{}{}-{}.json'.format(category, add_zero(start_id, 6), add_zero(end_id, 6))
     with open(json_name, 'w', encoding='utf-8') as f:
-        json.dump(all_dic, f, indent=4, ensure_ascii=False)
+        json.dump(all_list, f, indent=4, ensure_ascii=False)
 
 def sanook(start_id, end_id):  # 6 digits
     # open json file
