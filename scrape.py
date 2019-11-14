@@ -65,7 +65,7 @@ def matichon(start_id, end_id):  # 7 digits
                     all_list.append(dic)
         except:
             continue
-        
+
     # open json file
     json_name = '/Users/Nozomi/files/news/matichon/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
     with open(json_name, 'w', encoding='utf-8') as f:
@@ -77,12 +77,8 @@ def dailynews(start_id, end_id, category=None):  # 6 digits
     'women', 'education', 'bangkok', 'it', 'agriculture', 'sports']
     assert category in category_list, 'must choose category: {}'.format(' '.join(category_list))
 
-    # open json file
-    json_name = '/Users/Nozomi/files/news/dailynews/dailynews_{}{}-{}.json'.format(category, add_zero(start_id, 6), add_zero(end_id, 6))
-    file = open(json_name, 'w', encoding='utf-8')
-
     # dictionary: {id: content} - saved as json
-    all_dic = {}
+    all_list = []
 
     # scraping
     for article_id in range(int(start_id), int(end_id)):
@@ -102,11 +98,13 @@ def dailynews(start_id, end_id, category=None):  # 6 digits
                 article_url = response.url
                 id6 = '0'*(6-len(str(article_id))) + str(article_id) 
                 
-                all_dic[id6] = {"headline":headline, "description": description, "article":article, "date":date,
-                "category":category, "url":article_url}
-    json.dump(all_dic, file, indent=4, ensure_ascii=False)
-    file.close()
-
+                all_list = {"headline":headline,"description": description, "article":article, "date":date,
+                "category":category, "id":str(article_id), "url":article_url}
+    
+    # open json file
+    json_name = '/Users/Nozomi/news/dailynews/dailynews_{}{}-{}.json'.format(category, add_zero(start_id, 6), add_zero(end_id, 6))
+    with open(json_name, 'w', encoding='utf-8') as f:
+        json.dump(all_dic, f, indent=4, ensure_ascii=False)
 
 def sanook(start_id, end_id):  # 6 digits
     # open json file
