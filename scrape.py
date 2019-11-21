@@ -1,139 +1,136 @@
 import requests
 from bs4 import BeautifulSoup
-import json
+import json, re
 
-def add_zero(number:int, digits=7):
-    return '0'*(digits-len(str(number))) + str(number)
+category_list = ['politics', 'regional', 'entertainment', 'economic', 'crime', 'foreign', 'royalnews',
+'women', 'education', 'bangkok', 'it', 'agriculture', 'sports']
 
-def thairath(start_id, end_id):  # 7 digits
-    all_list = []
-    # scraping
-    for article_id in range(int(start_id), int(end_id)):
-        response = requests.get('https://www.thairath.co.th/content/' + str(article_id))
-        if response.status_code == 200:  # if 404 pass
-            soup = BeautifulSoup(response.text, "html.parser")  # get html
+"""
+HOW TO USE
 
-            # find more than 2 tags <script>, the final one is content
-            content_list = soup.find_all('script', type="application/ld+json")
+thairath(start_id, end_id)
+dailynews(start_id, end_id, category)
+"""
 
-            # convert the final one from json into dict
-            try:
-                content_dic = json.loads(content_list[-1].text)
-            except:
-                continue  # no content -> skip for loop to next id
+class NewsScrape:
+    def __init__(self, url:str, publisher:str):
+        self.url = url
+        self.publisher = publisher
 
-            dic = {'headline':content_dic['headline'], 'description':content_dic['description'],
-            'article':content_dic['articleBody'], 'date':content_dic['datePublished'], 'id':str(article_id), 'url':content_dic['mainEntityOfPage']['@id']}
-            all_list.append(dic)
-
-    # open json file
-    json_name = '/Users/Nozomi/files/news/thairath/json/thairath{}-{}.json'.format(add_zero(start_id), add_zero(end_id- 1))
-    with open(json_name, 'w', encoding='utf-8') as f:
-        json.dump(all_list, f, indent=4, ensure_ascii=False)
-
-
-def matichon(start_id, end_id):  # 7 digits
-    # dictionary: {id: content} - saved as json
-    all_list = []
-
-    # scraping
-    for article_id in range(int(start_id), int(end_id)):
+    def request(self, article_id:int, category=None):   
+        if self.publisher != 'dailynews':
+            request_url = self.url + str(article_id)
+        else:
+            request_url = self.url + f'{category}/{article_id}'
         try:
-            response = requests.get('https://www.matichon.co.th/news/' + str(article_id))
-            if response.status_code != 200:
-                continue
-            else:
-                soup = BeautifulSoup(response.text, "html.parser")  # get html
-                if soup.find('article') == None:
-                    continue
-                else:
-                    headline = soup.find('h1', class_="entry-title").text
-                    article = '\n'.join([i.text for i in soup.find('article').find_all('p') if i.text not in ['', '\xa0']])
-                    date = soup.find('article').find('time').get('datetime')
-                    article_url = response.url
-                    category = article_url.split('/')[-2]
-                    id7 = '0'*(7-len(str(article_id))) + str(article_id) 
-
-                    dic = {
-                        "headline":headline,
-                        "article":article,
-                        "date":date,
-                        "category":category,
-                        "url":article_url,
-                        "id":id7
-                        }
-                    all_list.append(dic)
+            response = requests.get(request_url, timeout=(12.0, 20.0))
         except:
-            continue
-
-    # open json file
-    json_name = '/Users/Nozomi/files/news/matichon/matichon{}-{}.json'.format(add_zero(start_id), add_zero(end_id-1))
-    with open(json_name, 'w', encoding='utf-8') as f:
-        json.dump(all_list, f, indent=4, ensure_ascii=False)
-
-
-def dailynews(start_id, end_id, category=None):  # 6 digits
-    category_list = ['politics', 'regional', 'entertainment', 'economic', 'crime', 'foreign', 'royalnews',
-    'women', 'education', 'bangkok', 'it', 'agriculture', 'sports']
-    assert category in category_list, 'must choose category: {}'.format(' '.join(category_list))
-
-    # dictionary: {id: content} - saved as json
-    all_list = []
-
-    # scraping
-    for article_id in range(int(start_id), int(end_id)):
-        response = requests.get('https://www.dailynews.co.th/{}/'.format(category) + str(article_id))
+            return None
         if response.status_code != 200:
-            continue
-        else:
-            soup = BeautifulSoup(response.text, "html.parser")  # get html
-            content = soup.find('article', id="news-article")
-            if content == None:
-                continue
-            else:
-                headline = content.find('h1', class_='title').text
-                description = content.find('p', class_='desc').text
-                article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
-                date = soup.find('meta', property="article:published_time").get('content')
-                article_url = response.url
-                id6 = '0'*(6-len(str(article_id))) + str(article_id) 
-                
-                dic = {"headline":headline,"description":description, "article":article, "date":date,
-                "category":category, "id":id6, "url":article_url}
-                all_list.append(dic)
+            return None
+        return BeautifulSoup(response.text, "html.parser") 
+
+    def dic_thairath(self, soup, article_id:int):
+        content_list = soup.find_all('script', type="application/ld+json")
+        if content_list == []:
+            return None
+        try:
+            content_dic = json.loads(content_list[-1].text)
+        except:
+            return None
+        dic = {
+            'headline':content_dic['headline'],
+            'description':content_dic['description'],
+            'article':content_dic['articleBody'],
+            'date':content_dic['datePublished'],
+            'id':article_id,
+            'url':content_dic['mainEntityOfPage']['@id']}
+        return dic
+
+    def dic_matichon(self, soup, article_id):
+        if soup.find('article') == None:
+            return None
+        headline = soup.find('h1', class_="entry-title").text
+        article = '\n'.join([i.text for i in soup.find('article').find_all('p') if i.text not in ['', '\xa0']])
+        date = soup.find('article').find('time').get('datetime')
+        article_url = soup.url
+        category = article_url.split('/')[-2]
+        dic = {
+            "headline":headline,
+            "article":article,
+            "date":date,
+            "category":category,
+            "url":article_url,
+            "id":article_id
+            }
+        return dic
     
-    # open json file
-    json_name = '/Users/Nozomi/news/dailynews/dailynews_{}{}-{}.json'.format(category, add_zero(start_id, 6), add_zero(end_id, 6))
-    with open(json_name, 'w', encoding='utf-8') as f:
-        json.dump(all_list, f, indent=4, ensure_ascii=False)
+    def dic_dailynews(self, soup, article_id, category):
+        content = soup.find('article', id="news-article")
+        if content == None:
+            return None   
+        headline = content.find('h1', class_='title').text
+        description = content.find('p', class_='desc').text
+        article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
+        date = soup.find('meta', property="article:published_time").get('content')
+        article_url = soup.url     
+        dic = {
+            "headline":headline,
+            "description":description,
+            "article":article,
+            "date":date,
+            "category":category,
+            "id":article_id,
+            "url":article_url}
+        return dic
 
-def sanook(start_id, end_id):  # 6 digits
-    # open json file
-    json_name = '/Users/Nozomi/files/news/sanook/dailynews_{}-{}.json'.format(add_zero(start_id, 7), add_zero(end_id, 7))
-    file = open(json_name, 'w', encoding='utf-8')
+    def dic_sanook(self, soup, article_id):
+        data = soup.find_all('script',type="application/ld+json")
+        if data == []:
+            return None
+        try:
+            data = json.loads(data[-1].text)
+        except:
+            return None
+        dic = {
+            "headline":data['headline'], 
+            "article":data['articleBody'], 
+            "date":data['datePublished'],
+            "author":data['author']['name'],
+            "url":data['mainEntityOfPage']['@id'],
+            "id":article_id}
+        return dic
 
-    # dictionary: {id: content} - saved as json
-    all_dic = {}
-
-    # scraping
-    for article_id in range(int(start_id), int(end_id)):
-        response = requests.get('https://www.sanook.com/news/' + str(article_id))
-        if response.status_code != 200:
-            continue
-        else:
-            soup = BeautifulSoup(response.text, "html.parser")  # get html
-            content = soup.find('article', id="news-article")
-            if content == None:
+    def save_json(self, start_id:int, end_id:int, category=None):
+        all_list = []
+        for article_id in range(start_id, end_id):
+            soup = self.request(article_id, category)
+            if soup == None:
                 continue
-            else:
-                headline = content.find('h1', class_='title').text
-                description = content.find('p', class_='desc').text
-                article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
-                date = soup.find('meta', property="article:published_time").get('content')
-                article_url = response.url
-                id6 = '0'*(6-len(str(article_id))) + str(article_id) 
-                
-                all_dic[id6] = {"headline":headline, "description": description, "article":article, "date":date,
-                "category":category, "url":article_url}
-    json.dump(all_dic, file, indent=4, ensure_ascii=False)
-    file.close()
+            elif self.publisher == 'thairath':
+                dic = self.dic_thairath(soup, article_id)
+            elif self.publisher == 'matichon':
+                dic = self.dic_matichon(soup, article_id)
+            elif self.publisher == 'dailynews':
+                dic = self.dic_dailynews(soup, article_id, category)
+            elif self.publisher == 'sanook':
+                dic = self.dic_sanook(soup, article_id)
+            if dic != None:
+                all_list.append(dic)
+
+        with open('/Users/Nozomi/news/{0}/{0}{1}-{2}.json'.format(self.publisher, start_id, end_id), 'w', encoding='utf-8') as f:
+            json.dump(all_list, f, indent=4, ensure_ascii=False)
+
+
+### assign methods to functions ###
+__tr = NewsScrape(url='https://www.thairath.co.th/content/', publisher='thairath')
+thairath = __tr.save_json
+
+__mc = NewsScrape(url='https://www.matichon.co.th/news/', publisher='matichon')
+matichon = __mc.save_json
+
+__dn = NewsScrape(url='https://www.dailynews.co.th/', publisher='dailynews')
+dailynews = __dn.save_json
+
+__sn = NewsScrape(url='https://www.sanook.com/news/', publisher='sanook')
+sanook = __sn.save_json
