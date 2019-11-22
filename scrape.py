@@ -17,7 +17,7 @@ class NewsScrape:
         self.url = url
         self.publisher = publisher
 
-    def request(self, article_id:int, category=None):   
+    def request(self, article_id:int, category=None) -> (soup, str):   
         if self.publisher != 'dailynews':
             request_url = self.url + str(article_id)
         else:
@@ -25,10 +25,10 @@ class NewsScrape:
         try:
             response = requests.get(request_url, timeout=(12.0, 20.0))
         except:
-            return None
+            return None, None
         if response.status_code != 200:
-            return None
-        return BeautifulSoup(response.text, "html.parser") 
+            return None, None
+        return BeautifulSoup(response.text, "html.parser"), response.url 
 
     def dic_thairath(self, soup, article_id:int):
         content_list = soup.find_all('script', type="application/ld+json")
@@ -47,13 +47,12 @@ class NewsScrape:
             'url':content_dic['mainEntityOfPage']['@id']}
         return dic
 
-    def dic_matichon(self, soup, article_id):
+    def dic_matichon(self, soup, article_id:int, article_url):
         if soup.find('article') == None:
             return None
         headline = soup.find('h1', class_="entry-title").text
         article = '\n'.join([i.text for i in soup.find('article').find_all('p') if i.text not in ['', '\xa0']])
         date = soup.find('article').find('time').get('datetime')
-        article_url = soup.url
         category = article_url.split('/')[-2]
         dic = {
             "headline":headline,
@@ -65,15 +64,14 @@ class NewsScrape:
             }
         return dic
     
-    def dic_dailynews(self, soup, article_id, category):
+    def dic_dailynews(self, soup, article_id, category, article_url):
         content = soup.find('article', id="news-article")
         if content == None:
             return None   
         headline = content.find('h1', class_='title').text
         description = content.find('p', class_='desc').text
         article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
-        date = soup.find('meta', property="article:published_time").get('content')
-        article_url = soup.url     
+        date = soup.find('meta', property="article:published_time").get('content')  
         dic = {
             "headline":headline,
             "description":description,
@@ -104,15 +102,15 @@ class NewsScrape:
     def save_json(self, start_id:int, end_id:int, category=None):
         all_list = []
         for article_id in range(start_id, end_id):
-            soup = self.request(article_id, category)
+            soup, article_url = self.request(article_id, category)
             if soup == None:
                 continue
             elif self.publisher == 'thairath':
                 dic = self.dic_thairath(soup, article_id)
             elif self.publisher == 'matichon':
-                dic = self.dic_matichon(soup, article_id)
+                dic = self.dic_matichon(soup, article_id, article_url)
             elif self.publisher == 'dailynews':
-                dic = self.dic_dailynews(soup, article_id, category)
+                dic = self.dic_dailynews(soup, article_id, category, article_url)
             elif self.publisher == 'sanook':
                 dic = self.dic_sanook(soup, article_id)
             if dic != None:
@@ -123,11 +121,11 @@ class NewsScrape:
 
 
 ### assign methods to functions ###
-__tr = NewsScrape(url='https://www.thairath.co.th/content/', publisher='thairath')
-thairath = __tr.save_json
+tr = NewsScrape(url='https://www.thairath.co.th/content/', publisher='thairath')
+thairath = tr.save_json
 
-__mc = NewsScrape(url='https://www.matichon.co.th/news/', publisher='matichon')
-matichon = __mc.save_json
+mc = NewsScrape(url='https://www.matichon.co.th/news/', publisher='matichon')
+matichon = mc.save_json
 
 __dn = NewsScrape(url='https://www.dailynews.co.th/', publisher='dailynews')
 dailynews = __dn.save_json
