@@ -121,11 +121,11 @@ class NewsScrape:
 
 
 ### assign methods to functions ###
-tr = NewsScrape(url='https://www.thairath.co.th/content/', publisher='thairath')
-thairath = tr.save_json
+__tr = NewsScrape(url='https://www.thairath.co.th/content/', publisher='thairath')
+thairath = __tr.save_json
 
-mc = NewsScrape(url='https://www.matichon.co.th/news/', publisher='matichon')
-matichon = mc.save_json
+__mc = NewsScrape(url='https://www.matichon.co.th/news/', publisher='matichon')
+matichon = __mc.save_json
 
 __dn = NewsScrape(url='https://www.dailynews.co.th/', publisher='dailynews')
 dailynews = __dn.save_json
