@@ -17,7 +17,7 @@ class NewsScrape:
         self.url = url
         self.publisher = publisher
 
-    def request(self, article_id:int, category=None) -> (soup, str):   
+    def request(self, article_id:int, category='bangkok'):   
         if self.publisher != 'dailynews':
             request_url = self.url + str(article_id)
         else:
@@ -64,13 +64,14 @@ class NewsScrape:
             }
         return dic
     
-    def dic_dailynews(self, soup, article_id, category, article_url):
+    def dic_dailynews(self, soup, article_id, article_url):
         content = soup.find('article', id="news-article")
         if content == None:
             return None   
         headline = content.find('h1', class_='title').text
         description = content.find('p', class_='desc').text
         article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
+        category = soup.find('ol', class_="breadcrumb").find_all('a')[-1].text
         date = soup.find('meta', property="article:published_time").get('content')  
         dic = {
             "headline":headline,
@@ -78,8 +79,8 @@ class NewsScrape:
             "article":article,
             "date":date,
             "category":category,
-            "id":article_id,
-            "url":article_url}
+            "id":article_id
+            }
         return dic
 
     def dic_sanook(self, soup, article_id):
@@ -99,7 +100,7 @@ class NewsScrape:
             "id":article_id}
         return dic
 
-    def save_json(self, start_id:int, end_id:int, category=None):
+    def save_json(self, start_id:int, end_id:int, category='bangkok'):
         all_list = []
         for article_id in range(start_id, end_id):
             soup, article_url = self.request(article_id, category)
@@ -110,7 +111,7 @@ class NewsScrape:
             elif self.publisher == 'matichon':
                 dic = self.dic_matichon(soup, article_id, article_url)
             elif self.publisher == 'dailynews':
-                dic = self.dic_dailynews(soup, article_id, category, article_url)
+                dic = self.dic_dailynews(soup, article_id, article_url)
             elif self.publisher == 'sanook':
                 dic = self.dic_sanook(soup, article_id)
             if dic != None:
