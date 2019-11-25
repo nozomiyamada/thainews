@@ -17,11 +17,8 @@ class NewsScrape:
         self.url = url
         self.publisher = publisher
 
-    def request(self, article_id:int, category='bangkok'):   
-        if self.publisher != 'dailynews':
-            request_url = self.url + str(article_id)
-        else:
-            request_url = self.url + f'{category}/{article_id}'
+    def request(self, article_id:int):   
+        request_url = self.url + str(article_id)
         try:
             response = requests.get(request_url, timeout=(12.0, 20.0))
         except:
@@ -100,10 +97,10 @@ class NewsScrape:
             "id":article_id}
         return dic
 
-    def save_json(self, start_id:int, end_id:int, category='bangkok'):
+    def save_json(self, start_id:int, end_id:int):
         all_list = []
         for article_id in range(start_id, end_id):
-            soup, article_url = self.request(article_id, category)
+            soup, article_url = self.request(article_id)
             if soup == None:
                 continue
             elif self.publisher == 'thairath':
@@ -128,7 +125,7 @@ thairath = __tr.save_json
 __mc = NewsScrape(url='https://www.matichon.co.th/news/', publisher='matichon')
 matichon = __mc.save_json
 
-__dn = NewsScrape(url='https://www.dailynews.co.th/', publisher='dailynews')
+__dn = NewsScrape(url='https://www.dailynews.co.th/bangkok/', publisher='dailynews')
 dailynews = __dn.save_json
 
 __sn = NewsScrape(url='https://www.sanook.com/news/', publisher='sanook')
