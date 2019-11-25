@@ -72,7 +72,7 @@ class NewsScrape:
         description = content.find('p', class_='desc').text
         article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
         category = soup.find('ol', class_="breadcrumb").find_all('a')[-1].text
-        date = soup.find('meta', property="article:published_time").get('content')  
+        date = content.find('span', class_="date").text  
         dic = {
             "headline":headline,
             "description":description,
