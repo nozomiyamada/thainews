@@ -9,7 +9,6 @@ category_list = ['politics', 'regional', 'entertainment', 'economic', 'crime', '
 HOW TO USE
 
 thairath(start_id, end_id)
-dailynews(start_id, end_id, category)
 """
 
 class NewsScrape:
@@ -100,17 +99,20 @@ class NewsScrape:
     def save_json(self, start_id:int, end_id:int):
         all_list = []
         for article_id in range(start_id, end_id):
-            soup, article_url = self.request(article_id)
-            if soup == None:
+            try:
+                soup, article_url = self.request(article_id)
+                if soup == None:
+                    continue
+                elif self.publisher == 'thairath':
+                    dic = self.dic_thairath(soup, article_id)
+                elif self.publisher == 'matichon':
+                    dic = self.dic_matichon(soup, article_id, article_url)
+                elif self.publisher == 'dailynews':
+                    dic = self.dic_dailynews(soup, article_id, article_url)
+                elif self.publisher == 'sanook':
+                    dic = self.dic_sanook(soup, article_id)
+            except:
                 continue
-            elif self.publisher == 'thairath':
-                dic = self.dic_thairath(soup, article_id)
-            elif self.publisher == 'matichon':
-                dic = self.dic_matichon(soup, article_id, article_url)
-            elif self.publisher == 'dailynews':
-                dic = self.dic_dailynews(soup, article_id, article_url)
-            elif self.publisher == 'sanook':
-                dic = self.dic_sanook(soup, article_id)
             if dic != None:
                 all_list.append(dic)
 
