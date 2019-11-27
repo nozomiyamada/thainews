@@ -26,10 +26,11 @@ def trim(text:str):
 class NewsAnalyze:
     def __init__(self, publisher): # publisher: thairath, matichon, dailynews ...
         self.__publisher = publisher
+        self.path = f'/Users/Nozomi/news/{self.publisher}/'
 
     def tokenize(self):
-        jsonpaths = glob.glob(f'/Users/Nozomi/news/{self.publisher}/*.json')
-        tokenizedfiles = [f.split('tokenized')[0] for f in glob.glob(f'/Users/Nozomi/news/{self.publisher}/*tokenized.tsv')]
+        jsonpaths = glob.glob(self.path + '*.json')
+        tokenizedfiles = [f.split('tokenized')[0] for f in glob.glob(self.path + '*tokenized.tsv')]
         to_be_tokenized = [j for j in jsonpaths if j.split('.')[0] in tokenizedfiles]
         for json_path in to_be_tokenized:
             save_name = json_path.split('.json')[0] + 'tokenized.tsv'
@@ -38,20 +39,8 @@ class NewsAnalyze:
                 writer = csv.writer(f, delimiter=' ', lineterminator='\n')
                 writer.writerows(lst)
 
-    def __check_open(self):
-        assert self.__opened, 'open json file first'
-
-    def __add_zero(self, article_id):
-        # 5003 -> 0005003 (7 digits) 
-        return '0'*(7-len(str(article_id))) + str(article_id)  
-
-    def get_json(self):
-        if self.__publisher == 'thairath':
-            return glob.glob('/Users/Nozomi/files/news/thairath/*.json')
-        elif self.__publisher == 'matichon':
-            return glob.glob('/Users/Nozomi/files/news/matichon/*.json')
-        elif self.__publisher == 'dailynews':
-            return glob.glob('/Users/Nozomi/files/news/dailynews/*.json')
+    def no_articles(self):
+        return sum(map(len(js), glob.glob(self.path + '*.json')))
 
     def load(self, start_id:int):  # start_id = n (* 1000)
         start = '0'*(4-len(str(start_id))) + '{}001'.format(start_id)
@@ -152,6 +141,6 @@ class NewsAnalyze:
             plt.yscale('log')
             plt.show()
 
-tr = News('thairath')
-mc = News('matichon')
-dn = News('dailynews')
+tr = NewsAnalyze('thairath')
+mc = NewsAnalyze('matichon')
+dn = NewsAnalyze('dailynews')
