@@ -1,46 +1,42 @@
-import csv, json, html
-import re, os, glob
-import collections
-import numpy as np
-from pythainlp import word_tokenize
-from pythainlp import corpus
+import os, json, glob, time, re, csv, shutil, html
 import matplotlib.pyplot as plt
+import pandas as pd
+plt.style.use("ggplot")
+import numpy as np
+import scipy as sp
+from collections import Counter
+from gensim.models import word2vec
+from gensim.models import KeyedVectors
+from pythainlp import word_tokenize as wt
+from pythainlp import corpus
 
-def return_str(text):
-    """
-    return original text if any
-    return '' if None
-    (sometimes there is no content in certain keys of json)
-    """
-    if text is None:
-        return ''
-    else:
-        return text_trim(text)
+def js(filepath):
+    with open(filepath, 'r') as f:
+        return json.load(f)
 
-def text_trim(text:str):
+def trim(text:str):
     text = html.unescape(text)
-    #text = text.replace('\n', ' ')
-    text = text.replace('\t', ' ')
-    text = text.replace('\r', '')
-    text = text.replace('\u200b', '')
-    text = text.replace('\xa0', ' ')
+    text = re.sub(r'(\n|\t|\xa0)', ' ', text)
+    text = re.sub(r'(\r|\u200b)', '', text)
+    text = re.sub(r'https?://\S* ', '', text)
     text = re.sub(r' +', ' ', text)
     text = re.sub(r'[\'\"‘’“”`\)\(]', '', text)
-    return text.strip(' ')
+    return wt(text.strip(' '), keep_whitespace=False)
 
-def tokenize(text:str):
-    # raw string -> list of tokenized sentences (list of tokens)
-    seqs = [text_trim(seq) for seq in text.split('\n')]
-    return [word_tokenize(seq, keep_whitespace=False) for seq in seqs if seq !='' and seq != ' '] 
-
-class News:
+class NewsAnalyze:
     def __init__(self, publisher): # publisher: thairath, matichon, dailynews ...
         self.__publisher = publisher
-        self.__opened = False  # opened file yet or not
-        self.dic = {}  # loaded json file
-        self.file_name = ''  # name of json file
-        self.word_freq = None  # word frequency
-        self.path = ''  # path of json file
+
+    def tokenize(self):
+        jsonpaths = glob.glob(f'/Users/Nozomi/news/{self.publisher}/*.json')
+        tokenizedfiles = [f.split('tokenized')[0] for f in glob.glob(f'/Users/Nozomi/news/{self.publisher}/*tokenized.tsv')]
+        to_be_tokenized = [j for j in jsonpaths if j.split('.')[0] in tokenizedfiles]
+        for json_path in to_be_tokenized:
+            save_name = json_path.split('.json')[0] + 'tokenized.tsv'
+            lst = [trim(news_dic['article']) for news_dic in js(json_path)]
+            with open(save_name+'.tsv', 'w', encoding='utf-8') as f:
+                writer = csv.writer(f, delimiter=' ', lineterminator='\n')
+                writer.writerows(lst)
 
     def __check_open(self):
         assert self.__opened, 'open json file first'
