@@ -34,7 +34,7 @@ class NewsAnalyze:
         self.publisher = publisher
         self.path = f'/Users/Nozomi/news/{publisher}/'
 
-    def tokenize(self):
+    def tokenize(self, only_one=False):
         jsons = set(glob.glob(self.path + '*.json')) # all json files
         tokenized_txt = {f.split('tokenized')[0]+'.json' for f in glob.glob(self.path + '*tokenized.txt')} # already tokenized file
         to_be_tokenized = jsons - tokenized_txt # untokenized json files
@@ -44,6 +44,8 @@ class NewsAnalyze:
             with open(save_name, 'w', encoding='utf-8') as f:
                 writer = csv.writer(f, delimiter='\t', lineterminator='\n')
                 writer.writerows(lst)
+            if only_one:
+                return
 
     def no_article(self):
         return sum(len(js(i)) for i in glob.glob(self.path + '*.json'))
@@ -56,9 +58,9 @@ class NewsAnalyze:
             with open(t) as f:
                 for line in csv.reader(f, delimiter='\t'):
                     for word in line:
-                        count[word] += 1
+                        count[str(word)] += 1
                         if word not in stops:
-                            stop[word] += 1
+                            stop[str(word)] += 1
         # with stopwords
         df = pd.DataFrame(count.most_common(),columns=['word', 'count'],index=None)
         df.to_csv(self.path + 'wf.csv',index=None)
@@ -83,8 +85,8 @@ class NewsAnalyze:
 
     def topn_th(self, n=50, delimiter=' '):
         self.load_wf()
-        only_th = [w for w in self.count.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', w)][:n]
-        only_th2 = [w for w in self.stop.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', w)][:n]
+        only_th = [w for w in self.count.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
+        only_th2 = [w for w in self.stop.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
         print(f'with stopwords\n{delimiter.join(only_th)}\n')
         print(f'w/o stopwords\n{delimiter.join(only_th2)}')
 
@@ -101,14 +103,17 @@ class NewsAnalyze:
         plt.xlim([1e0,1e7]), plt.ylim([1e0,1e7])
         plt.show()
 
+    def utest(self):
+        pass
+
     def entropy(self, remove_punct=True):
         """
         entropy = -Σ p*log2(p) = -Σ c/N * log2(c/N) = -1/N Σ c*(log2(c) - log2(N))
         """
         self.load_wf()
         # remove punctuations
-        count_removed = [c for i,w,c in self.count.itertuples() if re.match(r'^[A-zก-๙]', w)]
-        stop_removed = [c for i,w,c in self.stop.itertuples() if re.match(r'^[A-zก-๙]', w)]
+        count_removed = [c for i,w,c in self.count.itertuples() if re.match(r'^[A-zก-๙]', str(w))]
+        stop_removed = [c for i,w,c in self.stop.itertuples() if re.match(r'^[A-zก-๙]', str(w))]
         count = self.count['count']
         stop = self.stop['count']
         
@@ -167,7 +172,7 @@ def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, 
 
     # make a ordered list of words
     if only_thai:
-        word_order = [w for w in word_order if w in common_words if re.match(r'^[ก-๙][ก-๙ \.]*$', w)][:nmax]
+        word_order = [w for w in word_order if w in common_words if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:nmax]
     else:
         word_order = [w for w in word_order if w in common_words][:nmax]
 
