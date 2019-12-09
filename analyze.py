@@ -1,6 +1,5 @@
 import os, json, glob, re, csv, shutil, html, itertools
 import matplotlib.pyplot as plt
-plt.style.use("ggplot")
 import numpy as np
 import scipy as sp
 import pandas as pd
@@ -134,6 +133,7 @@ sn = NewsAnalyze('sanook')
 nhk = NewsAnalyze('nhk')
 
 def zipf_all(publishers=[tr,dn,mc,sn,nhk]):
+    plt.style.use("ggplot")
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 2, 1)
     ax2 = fig.add_subplot(1, 2, 2)
@@ -169,6 +169,7 @@ def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, 
             common_words = set(p.stop['word'])
         else:
             common_words &= set(p.stop['word'])
+    print(f'common words: {len(common_words)}\n')
 
     # make a ordered list of words
     if only_thai:
@@ -195,6 +196,7 @@ def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, 
 
     # plot
     if plot:
+        plt.style.use("ggplot")
         x = np.arange(step, nmax+1, step)
         for i in range(len(publishers)):
             for j in range(i+1, len(publishers)):

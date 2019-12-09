@@ -17,7 +17,7 @@
 |Sanook|17,931|6,874,537|60,782||113.10|
 |NHK Thai|630|||||
 
-## Methods & Results
+## Methods
 
 1. word frequency
     
@@ -36,11 +36,15 @@
 
     > word2vec
 
-3. entropy
+3. Entropy
+
+## Results
+
+3. Entropy
 
 ||stop, punct|stop, ~~punct~~|~~stop~~, punct|~~stop~~, ~~punct~~|
 |:-:|:-:|:-:|:-:|:-:|
-|Thairath|||||
+|Thairath|11.50|11.45|12.44|12.58|
 |Dailynews|11.39|11.29|12.55|12.54|
 |Matichon|11.34|11.24|12.49|12.48|
 |Sanook|11.00|10.92|12.17|12.16|
