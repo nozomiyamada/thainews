@@ -1,9 +1,5 @@
-import requests
+import requests, json, re
 from bs4 import BeautifulSoup
-import json, re
-
-category_list = ['politics', 'regional', 'entertainment', 'economic', 'crime', 'foreign', 'royalnews',
-'women', 'education', 'bangkok', 'it', 'agriculture', 'sports']
 
 """
 HOW TO USE
