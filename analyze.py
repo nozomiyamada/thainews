@@ -125,6 +125,7 @@ class NewsAnalyze:
         return (pd.DataFrame(result, columns=['token','vocab','t/v','entropy'],
         index=['with stop with punct:', 'with stop w/o  punct:', 'w/o  stop with punct:', 'w/o  stop w/o  punct:']))
 
+
 ### instantiation ###
 tr = NewsAnalyze('thairath')
 mc = NewsAnalyze('matichon')
