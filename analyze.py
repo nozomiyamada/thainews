@@ -96,6 +96,9 @@ class NewsAnalyze:
         self.wf2 = pd.read_csv(self.path + 'wf_stop.csv', encoding='utf-8') # without stopwords
         self.df = pd.read_csv(self.path + 'df.csv', encoding='utf-8') # document frequency
 
+    def release_memory(self):
+        self.wf1, self.wf2, self.df = [],[],[]
+
     def tfidf(self, word):
         pass
 
@@ -104,15 +107,20 @@ class NewsAnalyze:
         print(f'wf with stopwords\n{delimiter.join(self.wf1["word"][:n])}\n')
         print(f'wf w/o stopwords\n{delimiter.join(self.wf2["word"][:n])}\n')
         print(f'df\n{delimiter.join(self.df["word"][:n])}')
+        self.release_memory()
 
     def topn_th(self, n=50, delimiter=' '): # show top n Thai words 
         self.load_freq()
+        stopwords = corpus.thai_stopwords()
         only_th1 = [w for w in self.wf1.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
         only_th2 = [w for w in self.wf2.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
         only_th3 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
+        only_th4 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w)) and str(w) not in stopwords][:n]
         print(f'wf with stopwords\n{delimiter.join(only_th1)}\n')
         print(f'wf w/o stopwords\n{delimiter.join(only_th2)}\n')
-        print(f'df\n{delimiter.join(only_th3)}')
+        print(f'df with stopwords\n{delimiter.join(only_th3)}\n')
+        print(f'df w/o stopwords\n{delimiter.join(only_th4)}')
+        self.release_memory()
 
     def zipf(self,remove_punct=True): # plot zipf law of the publisher
         self.load_freq()
@@ -126,6 +134,7 @@ class NewsAnalyze:
         plt.legend(loc='best')
         plt.xlim([1e0,1e7]), plt.ylim([1e0,1e7])
         plt.show()
+        self.release_memory()
 
     def entropy(self, remove_punct=True):
         """
@@ -137,6 +146,7 @@ class NewsAnalyze:
         wf2_removed = [c for i,w,c in self.wf2.itertuples() if re.match(r'^[A-zก-๙]', str(w))]
         wf1 = self.wf1['count']
         wf2 = self.wf2['count']
+        self.release_memory()
         
         # calculate entropies: with or w/o stop, with of w/o punct
         result = []
@@ -165,7 +175,7 @@ def zipf_all(publishers=[tr,dn,mc,sn,nhk]): # plot zipf of all publishers
         cx, sx = range(1, len(p.wf1)+1), range(1, len(p.wf2)+1)
         ax1.plot(cx, p.wf1.iloc[:,1], label=p.publisher)
         ax2.plot(sx, p.wf2.iloc[:,1], label=p.publisher)
-        p.wf1, p.wf2, p.df = [], [], []  # release memory
+        p.release memory()
     ax1.set_title('word frequency with stop')
     ax2.set_title('word frequency w/o stop')
     ax1.set_ylabel('word frequency')
