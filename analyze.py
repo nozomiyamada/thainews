@@ -1,5 +1,6 @@
 import os, json, glob, re, csv, shutil, html, itertools
 import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 import numpy as np
 import scipy as sp
 import pandas as pd
@@ -20,7 +21,7 @@ def trim(text:str):
     text = html.unescape(text)
     text = re.sub(r'(\n|\t|\xa0)', ' ', text)
     text = re.sub(r'(\r|\u200b)', '', text)
-    text = re.sub(r'https?://\S* ', '', text)
+    text = re.sub(r'\bhttps?://\S*\b', '', text)
     text = re.sub(r' +', ' ', text)
     text = re.sub(r'[\'\"‘’“”`\)\(]', '', text)
     return wt(text.strip(' '), keep_whitespace=False) 
@@ -31,14 +32,14 @@ def cossim(v1, v2):
 class NewsAnalyze:
     def __init__(self, publisher:str): # publisher: thairath, matichon, dailynews, sanook, nhk
         self.publisher = publisher
-        self.path = f'/Users/Nozomi/news/{publisher}/'
+        self.path = f'/Users/Nozomi/gdrive/scraping/{publisher}/'
 
     def tokenize(self, only_one=False):
         jsons = set(glob.glob(self.path + '*.json')) # all json files
-        tokenized_txt = {f.split('tokenized')[0]+'.json' for f in glob.glob(self.path + '*tokenized.txt')} # already tokenized file
+        tokenized_txt = {f.split('tokenized')[0]+'.json' for f in glob.glob(self.path + '*tokenized.tsv')} # already tokenized file
         to_be_tokenized = jsons - tokenized_txt # untokenized json files
         for json_path in to_be_tokenized:
-            save_name = json_path.split('.json')[0] + 'tokenized.txt'
+            save_name = json_path.split('.json')[0] + 'tokenized.tsv' # thairath01.json -> thairath01tokenized.tsv
             lst = [trim(news_dic['article']) for news_dic in js(json_path)]
             with open(save_name, 'w', encoding='utf-8') as f:
                 writer = csv.writer(f, delimiter='\t', lineterminator='\n')
@@ -47,54 +48,78 @@ class NewsAnalyze:
                 return
 
     def no_article(self):
-        return sum(len(js(i)) for i in glob.glob(self.path + '*.json'))
+        self.num_article = sum(len(js(i)) for i in glob.glob(self.path + '*.json'))
+        print(f'No. of articles: {self.num_article}')
 
-    def make_wf(self):
-        txt_list = glob.glob(self.path+'*tokenized.txt')
-        count, stop = Counter(), Counter()
-        stops = corpus.thai_stopwords()
-        for t in txt_list:
+    def make_wf(self): # make csv files of word frequency 
+        tokenized_list = glob.glob(self.path+'*tokenized.tsv')
+        count1, count2 = Counter(), Counter() # count1: with stopwords, count2: w/o stopwords
+        stopwords = corpus.thai_stopwords()
+        for t in tokenized_list:
             with open(t) as f:
                 for line in csv.reader(f, delimiter='\t'):
                     for word in line:
-                        count[str(word)] += 1
-                        if word not in stops:
-                            stop[str(word)] += 1
+                        count1[str(word)] += 1
+                        if word not in stopwords:
+                            count2[str(word)] += 1
         # with stopwords
-        df = pd.DataFrame(count.most_common(),columns=['word', 'count'],index=None)
+        df = pd.DataFrame(count1.most_common(),columns=['word','count'],index=None)
         df.to_csv(self.path + 'wf.csv',index=None)
         # without stopwords
-        df = pd.DataFrame(stop.most_common(),columns=['word', 'count'],index=None)
+        df = pd.DataFrame(count2.most_common(),columns=['word','count'],index=None)
         df.to_csv(self.path + 'wf_stop.csv',index=None)
 
-    def load_wf(self):
+    def make_df(self): # make document frequnecy for tf-idf
+        document_count = Counter()
+        tokenized_files = glob.glob(self.path+'*tokenized.tsv')
+        for each_file in tokenized_files:
+            with open(each_file, encoding='utf-8') as f:
+                for document in csv.reader(f, delimiter='\t'):
+                    word_set = set(document)
+                    for word in word_set:
+                        document_count[word] += 1
+        df = pd.DataFrame(document_count.most_common(),columns=['word','count'],index=None)
+        df.to_csv(self.path + 'df.csv',index=None)
+
+    def load_freq(self):
         """
-        self.count, self.stop are pd.DataFrame
+        self.wf1, self.wf2 are pd.DataFrame
             word count
             aaaa 2000
             bbbb 1000
+
+        self.df is pd.DataFrame too
+            word df
+            aaaa 100
         """
-        self.count = pd.read_csv(self.path + 'wf.csv', encoding='utf-8')
-        self.stop  = pd.read_csv(self.path + 'wf_stop.csv', encoding='utf-8')
+        self.wf1 = pd.read_csv(self.path + 'wf.csv', encoding='utf-8') # with stopwords
+        self.wf2 = pd.read_csv(self.path + 'wf_stop.csv', encoding='utf-8') # without stopwords
+        self.df = pd.read_csv(self.path + 'df.csv', encoding='utf-8') # document frequency
 
-    def topn(self, n=50, delimiter=' '):
-        self.load_wf()
-        print(f'with stopwords\n{delimiter.join(self.count["word"][:n])}\n')
-        print(f'w/o stopwords\n{delimiter.join(self.stop["word"][:n])}')
+    def tfidf(self, word):
+        pass
 
-    def topn_th(self, n=50, delimiter=' '):
-        self.load_wf()
-        only_th = [w for w in self.count.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
-        only_th2 = [w for w in self.stop.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
-        print(f'with stopwords\n{delimiter.join(only_th)}\n')
-        print(f'w/o stopwords\n{delimiter.join(only_th2)}')
+    def topn(self, n=50, delimiter=' '): # show top n words 
+        self.load_freq()
+        print(f'wf with stopwords\n{delimiter.join(self.wf1["word"][:n])}\n')
+        print(f'wf w/o stopwords\n{delimiter.join(self.wf2["word"][:n])}\n')
+        print(f'df\n{delimiter.join(self.df["word"][:n])}')
 
-    def zipf(self):
-        self.load_wf()
-        cx, sx = range(1, len(self.count)+1), range(1, len(self.stop)+1)
+    def topn_th(self, n=50, delimiter=' '): # show top n Thai words 
+        self.load_freq()
+        only_th1 = [w for w in self.wf1.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
+        only_th2 = [w for w in self.wf2.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
+        only_th3 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
+        print(f'wf with stopwords\n{delimiter.join(only_th1)}\n')
+        print(f'wf w/o stopwords\n{delimiter.join(only_th2)}\n')
+        print(f'df\n{delimiter.join(only_th3)}')
+
+    def zipf(self,remove_punct=True): # plot zipf law of the publisher
+        self.load_freq()
+        x1, x2 = range(1, len(self.wf1)+1), range(1, len(self.wf2)+1)
         plt.figure(figsize=(5,5))
-        plt.plot(cx, self.count["count"], label='with stopwords')
-        plt.plot(sx, self.stop["count"], label='w/o stopwords')
+        plt.plot(x1, self.wf1["count"], label='with stopwords')
+        plt.plot(x2, self.wf2["count"], label='w/o stopwords')
         plt.title(f'word frequency : {self.publisher}')
         plt.ylabel('word frequency [log]')
         plt.xscale('log'); plt.yscale('log')
@@ -102,29 +127,26 @@ class NewsAnalyze:
         plt.xlim([1e0,1e7]), plt.ylim([1e0,1e7])
         plt.show()
 
-    def utest(self):
-        pass
-
     def entropy(self, remove_punct=True):
         """
         entropy = -Σ p*log2(p) = -Σ c/N * log2(c/N) = -1/N Σ c*(log2(c) - log2(N))
         """
-        self.load_wf()
+        self.load_freq()
         # remove punctuations
-        count_removed = [c for i,w,c in self.count.itertuples() if re.match(r'^[A-zก-๙]', str(w))]
-        stop_removed = [c for i,w,c in self.stop.itertuples() if re.match(r'^[A-zก-๙]', str(w))]
-        count = self.count['count']
-        stop = self.stop['count']
+        wf1_removed = [c for i,w,c in self.wf1.itertuples() if re.match(r'^[A-zก-๙]', str(w))]
+        wf2_removed = [c for i,w,c in self.wf2.itertuples() if re.match(r'^[A-zก-๙]', str(w))]
+        wf1 = self.wf1['count']
+        wf2 = self.wf2['count']
         
+        # calculate entropies: with or w/o stop, with of w/o punct
         result = []
-        for i in [count, count_removed, stop, stop_removed]:
+        for i in [wf1, wf1_removed, wf2, wf2_removed]:
             N, V = sum(i), len(i)
             logN = np.log2(N)
             entropy = round(-1/N * sum(c * (np.log2(c)-logN) for c in i), 2)
             result.append([N, V, round(N/V,2), entropy])
         return (pd.DataFrame(result, columns=['token','vocab','t/v','entropy'],
         index=['with stop with punct:', 'with stop w/o  punct:', 'w/o  stop with punct:', 'w/o  stop w/o  punct:']))
-
 
 ### instantiation ###
 tr = NewsAnalyze('thairath')
@@ -133,17 +155,17 @@ dn = NewsAnalyze('dailynews')
 sn = NewsAnalyze('sanook')
 nhk = NewsAnalyze('nhk')
 
-def zipf_all(publishers=[tr,dn,mc,sn,nhk]):
+def zipf_all(publishers=[tr,dn,mc,sn,nhk]): # plot zipf of all publishers 
     plt.style.use("ggplot")
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 2, 1)
     ax2 = fig.add_subplot(1, 2, 2)
     for p in publishers:
-        p.load_wf()
-        cx, sx = range(1, len(p.count)+1), range(1, len(p.stop)+1)
-        ax1.plot(cx, p.count.iloc[:,1], label=p.publisher)
-        ax2.plot(sx, p.stop.iloc[:,1], label=p.publisher)
-        p.count, p.stop = None, None  # release memory
+        p.load_freq()
+        cx, sx = range(1, len(p.wf1)+1), range(1, len(p.wf2)+1)
+        ax1.plot(cx, p.wf1.iloc[:,1], label=p.publisher)
+        ax2.plot(sx, p.wf2.iloc[:,1], label=p.publisher)
+        p.wf1, p.wf2, p.df = [], [], []  # release memory
     ax1.set_title('word frequency with stop')
     ax2.set_title('word frequency w/o stop')
     ax1.set_ylabel('word frequency')
@@ -197,7 +219,6 @@ def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, 
 
     # plot
     if plot:
-        plt.style.use("ggplot")
         x = np.arange(step, nmax+1, step)
         for i in range(len(publishers)):
             for j in range(i+1, len(publishers)):
@@ -211,3 +232,5 @@ def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, 
 
     if show_words:
         return word_order
+
+

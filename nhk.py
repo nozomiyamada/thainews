@@ -1,4 +1,4 @@
-import requests, json, os, csv, re , sys
+import requests, json, os, csv, re, sys, shutil
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from bs4 import BeautifulSoup as BS
@@ -14,7 +14,7 @@ with open ('nhk/nhk.json', 'r') as f:
 
 def nhk_scrape():
     total_list = []
-    for i in range(int(ids[-1])+1, int(ids[-1])+3000):
+    for i in range(int(ids[-1])+1, int(ids[-1])+1000):
         url = f"https://www3.nhk.or.jp/nhkworld/th/news/{i}/"
         response = requests.get(url)
         response.encoding='utf-8'
@@ -41,3 +41,4 @@ def nhk_scrape():
     if os.path.exists('nhk/nhk.json') and os.path.exists('nhk/nhk_new.json') and os.path.getsize('nhk/nhk_new.json') >= os.path.getsize('nhk/nhk.json'):
         os.remove('nhk/nhk.json')
         os.rename('nhk/nhk_new.json', 'nhk/nhk.json')
+        shutil.copy('nhk/nhk.json', '/Users/Nozomi/gdrive/scraping/nhk')
