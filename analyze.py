@@ -121,9 +121,12 @@ class NewsAnalyze:
         print(f'df w/o stopwords\n{delimiter.join(only_th4)}')
         self.release_memory()
 
-    def zipf(self,remove_punct=True): # plot zipf law of the publisher
+    def zipf(self, remove_punct=True, rho=0): # plot zipf law of the publisher
+        """
+        f(r) ∝　(r+ρ)^-k 
+        """
         self.load_freq()
-        x1, x2 = range(1, len(self.wf1)+1), range(1, len(self.wf2)+1)
+        x1, x2 = np.arange(1, len(self.wf1)+1)+rho, np.arange(1, len(self.wf2)+1)+rho
         plt.figure(figsize=(5,5))
         plt.plot(x1, self.wf1["count"], label='with stopwords')
         plt.plot(x2, self.wf2["count"], label='w/o stopwords')
