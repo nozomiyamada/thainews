@@ -94,7 +94,7 @@ NHK Thai: word frequency without stopwords
 ![wordcloud](https://user-images.githubusercontent.com/44984892/70881665-d510f000-1fff-11ea-8c99-2320b19a85fa.png)
 
 ### 1.1 Zipf's Law
-![wordfreq](https://user-images.githubusercontent.com/44984892/70880337-32567280-1ffb-11ea-8285-34f515d1b005.png)
+![wordfreq](https://user-images.githubusercontent.com/44984892/70882789-69308680-2003-11ea-8784-84006d04f8b1.png)
 
 ## 2. Vectorization
 
