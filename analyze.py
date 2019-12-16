@@ -33,6 +33,7 @@ class NewsAnalyze:
     def __init__(self, publisher:str): # publisher: thairath, matichon, dailynews, sanook, nhk
         self.publisher = publisher
         self.path = f'/Users/Nozomi/gdrive/scraping/{publisher}/'
+        self.stop = corpus.thai_stopwords()
 
     def tokenize(self, only_one=False):
         jsons = set(glob.glob(self.path + '*.json')) # all json files
@@ -54,13 +55,12 @@ class NewsAnalyze:
     def make_wf(self): # make csv files of word frequency 
         tokenized_list = glob.glob(self.path+'*tokenized.tsv')
         count1, count2 = Counter(), Counter() # count1: with stopwords, count2: w/o stopwords
-        stopwords = corpus.thai_stopwords()
         for t in tokenized_list:
             with open(t) as f:
                 for line in csv.reader(f, delimiter='\t'):
                     for word in line:
                         count1[str(word)] += 1
-                        if word not in stopwords:
+                        if word not in self.stop:
                             count2[str(word)] += 1
         # with stopwords
         df = pd.DataFrame(count1.most_common(),columns=['word','count'],index=None)
@@ -111,11 +111,10 @@ class NewsAnalyze:
 
     def topn_th(self, n=50, delimiter=' '): # show top n Thai words 
         self.load_freq()
-        stopwords = corpus.thai_stopwords()
         only_th1 = [w for w in self.wf1.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
         only_th2 = [w for w in self.wf2.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
         only_th3 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
-        only_th4 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w)) and str(w) not in stopwords][:n]
+        only_th4 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w)) and str(w) not in self.stop][:n]
         print(f'wf with stopwords\n{delimiter.join(only_th1)}\n')
         print(f'wf w/o stopwords\n{delimiter.join(only_th2)}\n')
         print(f'df with stopwords\n{delimiter.join(only_th3)}\n')
@@ -135,6 +134,19 @@ class NewsAnalyze:
         plt.xlim([1e0,1e7]), plt.ylim([1e0,1e7])
         plt.show()
         self.release_memory()
+
+    def ngram(self, n=2, topn=50):
+        tokenized_list = glob.glob(self.path+'*tokenized.tsv')
+        ngram_count = Counter()
+        for t in tokenized_list: # iterate files
+            with open(t) as f:
+                for line in csv.reader(f, delimiter='\t'): # iterate articles
+                    for i in range(len(line)-n): # iterate words
+                        if any([(w in self.stop) or not re.match(r'^[A-zก-๙]', w) for w in line[i:i+n]]): # stop word or punct
+                            continue
+                        ngram_count[tuple(line[i:i+n])] += 1
+        for tpl, count in ngram_count.most_common(topn):
+            print(f'| {tpl[0]} | {tpl[1]} | {count} |')
 
     def entropy(self, remove_punct=True):
         """
@@ -158,6 +170,7 @@ class NewsAnalyze:
         return (pd.DataFrame(result, columns=['token','vocab','t/v','entropy'],
         index=['with stop with punct:', 'with stop w/o  punct:', 'w/o  stop with punct:', 'w/o  stop w/o  punct:']))
 
+
 ### instantiation ###
 tr = NewsAnalyze('thairath')
 mc = NewsAnalyze('matichon')
@@ -175,7 +188,7 @@ def zipf_all(publishers=[tr,dn,mc,sn,nhk]): # plot zipf of all publishers
         cx, sx = range(1, len(p.wf1)+1), range(1, len(p.wf2)+1)
         ax1.plot(cx, p.wf1.iloc[:,1], label=p.publisher)
         ax2.plot(sx, p.wf2.iloc[:,1], label=p.publisher)
-        p.release memory()
+        p.release_memory()
     ax1.set_title('word frequency with stop')
     ax2.set_title('word frequency w/o stop')
     ax1.set_ylabel('word frequency')
@@ -196,12 +209,13 @@ def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, 
     """
     # make a common word set
     for i, p in enumerate(publishers):
-        p.load_wf()
+        p.load_freq()
         if i == 0:
-            word_order = p.stop['word']
-            common_words = set(p.stop['word'])
+            word_order = p.wf2['word']
+            common_words = set(p.wf2['word'])
         else:
-            common_words &= set(p.stop['word'])
+            common_words &= set(p.wf2['word'])
+        p.wf1, p.df = [], [] # release memory
     print(f'common words: {len(common_words)}\n')
 
     # make a ordered list of words
@@ -213,7 +227,7 @@ def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, 
     # make an array of vectors
     vecs = np.zeros((len(publishers), nmax), dtype=float)
     for i, p in enumerate(publishers):
-        word_count_dic = dict(zip(p.stop['word'], p.stop['count']))
+        word_count_dic = dict(zip(p.wf2['word'], p.wf2['count']))
         for j, w in enumerate(word_order):
             vecs[i,j] = float(word_count_dic[w])
 
@@ -236,7 +250,7 @@ def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, 
         plt.xscale('log')
         plt.legend(loc='best')
         plt.title('cosine similarity of frequency vector')
-        plt.ylabel('size of vector')
+        plt.xlabel('dimension of vector')
         plt.ylabel('cosine similarity')
         plt.show()
 
