@@ -21,26 +21,28 @@
 
 1. Word/Document Frequency
     
-    >1.0 top 50 words
+    >1.1 top 50 words
+    
+    >1.2 n-gram
 
-    >1.1 Zipf's Law
+    >1.3 Zipf's Law
 
-    >1.2 Mann–Whitney U-test
+    >1.4 Mann–Whitney U-test
 
-    >1.3 χ<sup>2</sup> score
+    >1.5 χ<sup>2</sup> score
 
-    >1.4 tf-idf
+    >1.6 tf-idf
 
     tf-idf weighting has many variations. -> [Stanford NLP](https://nlp.stanford.edu/IR-book/html/htmledition/document-and-query-weighting-schemes-1.html)
 
 2. Vectorization
-    > 3.1 word frequency vector (20 - 20000 dimension)
+    > 2.1 word frequency vector (20 - 20000 dimension)
     
-    > 3.2 doc2vec
+    > 2.2 doc2vec
 
-    > 3.3 corpus2vec
+    > 2.3 corpus2vec
 
-    > 3.4 word2vec
+    > 2.4 word2vec
 
 3. Entropy
 
@@ -48,7 +50,7 @@
 
 ## 1. Word/Document Frequency
     
-### 1.0 top 50 words
+### 1.1 top 50 words
 
 word frequency with stopwords
 
@@ -93,13 +95,42 @@ document frequency without stopwords
 NHK Thai: word frequency without stopwords
 ![wordcloud](https://user-images.githubusercontent.com/44984892/70881665-d510f000-1fff-11ea-8c99-2320b19a85fa.png)
 
-### 1.1 Zipf's Law
+### 1.2 n-gram
+
+
+**NHK Thai**
+
+|||bigram count|
+|:-:|:-:|-:|
+| สมเด็จ | พระ | 215 |
+| รัฐบาล | ญี่ปุ่น | 131 |
+| กรุง | โตเกียว | 127 |
+| พระ | จักรพรรดิ | 107 |
+| ญี่ปุ่น | ระบุ | 97 |
+| โดนัลด์ | ทรัมป์ | 94 |
+| ประธานาธิบดี | โดนัลด์ | 82 |
+| พระ | สันตะปาปา | 72 |
+| ชินโซ | อาเบะ | 70 |
+| รัฐมนตรี | ต่างประเทศ | 66 |
+
+
+
+### 1.3 Zipf's Law
 ![wordfreq](https://user-images.githubusercontent.com/44984892/70882789-69308680-2003-11ea-8784-84006d04f8b1.png)
 
 ## 2. Vectorization
 
 ### 2.1 Cosine Similarity of Word Frequency Vector
 ![freq_vec](https://user-images.githubusercontent.com/44984892/70881016-c1fd2080-1ffd-11ea-870f-6ad503d8082d.png)
+
+cosine similarity of frequency vectors of 7000 dimensions
+
+|| dailynews | matichon  |  sanook  |     nhk|
+|:-:|-:|-:|-:|-:|
+|thairath |  0.982269  |0.958436  |0.868301  |0.486154|
+|dailynews  |  |0.976292  |0.865390  |0.523170|
+|matichon   | | |0.865427  |0.514641|
+|sanook    | | | |0.430216|
 
 ## 3. Entropy
 
@@ -110,5 +141,7 @@ NHK Thai: word frequency without stopwords
 |Matichon|11.31|11.21|12.49|12.48|
 |Sanook|11.00|10.92|12.17|12.16|
 |NHK Thai|9.99|9.89|10.81|10.72|
+
+
 
 
