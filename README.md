@@ -23,7 +23,7 @@
     
     >1.1 top 50 words
     
-    >1.2 n-gram
+    >1.2 bigram
 
     >1.3 Zipf's Law
 
@@ -95,8 +95,21 @@ document frequency without stopwords
 NHK Thai: word frequency without stopwords
 ![wordcloud](https://user-images.githubusercontent.com/44984892/70881665-d510f000-1fff-11ea-8c99-2320b19a85fa.png)
 
-### 1.2 n-gram
+### 1.2 bigram
+**Thairath**
 
+|||bigram count|
+|:-:|:-:|-:|
+| ล้าน | บาท | 279255 |
+| ประเทศ | ไทย | 251553 |
+| ทีม | ชาติ | 158305 |
+| น. | วันที่ | 106391 |
+| สำนัก | ข่าวต่างประเทศ | 84361 |
+| อ. | เมือง | 83851 |
+| ข่าวต่างประเทศ | รายงาน | 82266 |
+| ผู้สื่อข่าว | รายงาน | 74790 |
+| อ. | ประยุทธ์ | 71867 |
+| ชาติ | ไทย | 69908 |
 
 **NHK Thai**
 
