@@ -112,7 +112,7 @@ class NewsScrape:
             if dic != None:
                 all_list.append(dic)
 
-        with open('/Users/Nozomi/news/{0}/{0}{1}-{2}.json'.format(self.publisher, start_id, end_id), 'w', encoding='utf-8') as f:
+        with open('/Users/Nozomi/gdrive/scraping/{0}/{0}{1}-{2}.json'.format(self.publisher, start_id, end_id), 'w', encoding='utf-8') as f:
             json.dump(all_list, f, indent=4, ensure_ascii=False)
 
 
