@@ -183,12 +183,13 @@ NHK Thai: word frequency without stopwords
 
 cosine similarity of frequency vectors of 7000 dimensions
 
-|| dailynews | matichon  |  sanook  |     nhk|
-|:-:|-:|-:|-:|-:|
-|thairath |  0.982269  |0.958436  |0.868301  |0.486154|
-|dailynews  |  |0.976292  |0.865390  |0.523170|
-|matichon   | | |0.865427  |0.514641|
-|sanook    | | | |0.430216|
+|| Thairath | Dailynews | Matichon | Sanook | NHK Thai |
+|:-:|-:|-:|-:|-:|-:|
+|Thairath | - | 0.982269 | 0.958436 |0.868301  |0.486154|
+|Dailynews  | - | - | 0.976292  |0.865390  |0.523170|
+|Matichon   | - | - | - | 0.865427 |0.514641|
+|Sanook     | - | - | - | - | 0.430216|
+|NHK Thai   | - | - | - | - | - |
 
 ## 3. Entropy
 
