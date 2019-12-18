@@ -7,6 +7,8 @@ import pandas as pd
 from collections import Counter
 from gensim.models import word2vec
 from gensim.models import KeyedVectors
+from sklearn.metrics import r2_score
+from sklearn.linear_model import LinearRegression
 from pythainlp import word_tokenize as wt
 from pythainlp import corpus
 
@@ -34,6 +36,7 @@ class NewsAnalyze:
         self.publisher = publisher
         self.path = f'/Users/Nozomi/gdrive/scraping/{publisher}/'
         self.stop = corpus.thai_stopwords()
+        self.tokenized = glob.glob(self.path+'*tokenized.tsv') # list of tokenized file
 
     def tokenize(self, only_one=False):
         jsons = set(glob.glob(self.path + '*.json')) # all json files
@@ -52,10 +55,19 @@ class NewsAnalyze:
         self.num_article = sum(len(js(i)) for i in glob.glob(self.path + '*.json'))
         print(f'No. of articles: {self.num_article}')
 
+    def period(self):
+        jsons = set(glob.glob(self.path + '*.json')) # all json files
+        date_set = set()
+        for j in jsons:
+            data = js(j)
+            for dic in data:
+                if self.publisher != 'dailynews':
+                    date_set.add(dic['date'].split('T')[0].rsplit('-',1)[0])
+        return sorted(date_set)
+
     def make_wf(self): # make csv files of word frequency 
-        tokenized_list = glob.glob(self.path+'*tokenized.tsv')
         count1, count2 = Counter(), Counter() # count1: with stopwords, count2: w/o stopwords
-        for t in tokenized_list:
+        for t in self.tokenized:
             with open(t) as f:
                 for line in csv.reader(f, delimiter='\t'):
                     for word in line:
@@ -71,8 +83,7 @@ class NewsAnalyze:
 
     def make_df(self): # make document frequnecy for tf-idf
         document_count = Counter()
-        tokenized_files = glob.glob(self.path+'*tokenized.tsv')
-        for each_file in tokenized_files:
+        for each_file in self.tokenized:
             with open(each_file, encoding='utf-8') as f:
                 for document in csv.reader(f, delimiter='\t'):
                     word_set = set(document)
@@ -138,10 +149,33 @@ class NewsAnalyze:
         plt.show()
         self.release_memory()
 
+    def textlength(self): # relationship between vocab and text length
+        x, y = np.array([]), np.array([]) # x:text length, y:vocab 
+        for each_file in self.tokenized:
+            with open(each_file) as f:
+                for line in csv.reader(f, delimiter='\t'): # iterate articles
+                    x = np.append(x, len(line))
+                    y = np.append(y, len(set(line)))
+        plt.scatter(x, y, s=1)
+        plt.title(f'vocabulary - text length : {self.publisher}')
+        plt.xlabel('text length')
+        plt.ylabel('vocabulary')
+        plt.xscale('log'); plt.yscale('log')
+        #plt.xlim([1e0,1e7]), plt.ylim([1e0,1e7])
+        plt.show()
+
+        # linear regression
+        x = np.log(x).reshape(-1,1)
+        y = np.log(y).reshape(-1,1)
+        LR = LinearRegression()
+        LR.fit(x, y)
+        print('coef:', LR.coef_[0])
+        print('intercept:', LR.intercept_)
+        print('R2:', r2_score(LR.predict(x), y))
+
     def ngram(self, n=2, topn=50):
-        tokenized_list = glob.glob(self.path+'*tokenized.tsv')
         ngram_count = Counter()
-        for t in tokenized_list: # iterate files
+        for t in self.tokenized: # iterate files
             with open(t) as f:
                 for line in csv.reader(f, delimiter='\t'): # iterate articles
                     for i in range(len(line)-n): # iterate words
@@ -172,7 +206,6 @@ class NewsAnalyze:
             result.append([N, V, round(N/V,2), entropy])
         return (pd.DataFrame(result, columns=['token','vocab','t/v','entropy'],
         index=['with stop with punct:', 'with stop w/o  punct:', 'w/o  stop with punct:', 'w/o  stop w/o  punct:']))
-
 
 ### instantiation ###
 tr = NewsAnalyze('thairath')
