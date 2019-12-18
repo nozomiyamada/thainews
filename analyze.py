@@ -99,7 +99,7 @@ class NewsAnalyze:
     def release_memory(self):
         self.wf1, self.wf2, self.df = [],[],[]
 
-    def tfidf(self, word):
+    def make_tfidf(self):
         pass
 
     def topn(self, n=50, delimiter=' '): # show top n words 
@@ -149,7 +149,7 @@ class NewsAnalyze:
                             continue
                         ngram_count[tuple(line[i:i+n])] += 1
         for tpl, count in ngram_count.most_common(topn):
-            print(f'| {tpl[0]} | {tpl[1]} | {count} |')
+            print('|'+'|'.join(tpl+[count])+'|')
 
     def entropy(self, remove_punct=True):
         """
