@@ -26,12 +26,14 @@
     >1.2 bigram
 
     >1.3 Zipf's Law
+    
+    >1.4 Relationship between vacabulary and text length
 
-    >1.4 Mann–Whitney U-test
+    >1.5 Mann–Whitney U-test
 
-    >1.5 χ<sup>2</sup> score
+    >1.6 χ<sup>2</sup> score
 
-    >1.6 tf-idf
+    >1.7 tf-idf
 
     tf-idf weighting has many variations. -> [Stanford NLP](https://nlp.stanford.edu/IR-book/html/htmledition/document-and-query-weighting-schemes-1.html)
 
@@ -175,6 +177,13 @@ NHK Thai: word frequency without stopwords
 
 ### 1.3 Zipf's Law
 ![wordfreq](https://user-images.githubusercontent.com/44984892/70882789-69308680-2003-11ea-8784-84006d04f8b1.png)
+
+### 1.4 Relationship between vacabulary and text length
+||R<sup>2</sup>|coefficient|intercept|
+|:-:|-:|-:|-:|
+|Sanook|0.939|0.695|1.200|
+|NHK Thai|0.882|0.759|0.767|
+
 
 ## 2. Vectorization
 
