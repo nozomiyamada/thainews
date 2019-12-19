@@ -154,19 +154,21 @@ class NewsAnalyze:
         for each_file in self.tokenized:
             with open(each_file) as f:
                 for line in csv.reader(f, delimiter='\t'): # iterate articles
-                    x = np.append(x, len(line))
-                    y = np.append(y, len(set(line)))
+                    if len(line) != 0:
+                        x = np.append(x, len(line))
+                        y = np.append(y, len(set(line)))
+        plt.figure(figsize=(5,5))
         plt.scatter(x, y, s=1)
         plt.title(f'vocabulary - text length : {self.publisher}')
         plt.xlabel('text length')
         plt.ylabel('vocabulary')
         plt.xscale('log'); plt.yscale('log')
-        #plt.xlim([1e0,1e7]), plt.ylim([1e0,1e7])
+        plt.xlim([1e1,1e4]), plt.ylim([1e1,1e4])
         plt.show()
 
         # linear regression
-        x = np.log(x).reshape(-1,1)
-        y = np.log(y).reshape(-1,1)
+        x = np.log10(x).reshape(-1,1)
+        y = np.log10(y).reshape(-1,1)
         LR = LinearRegression()
         LR.fit(x, y)
         print('coef:', LR.coef_[0])
@@ -214,14 +216,14 @@ dn = NewsAnalyze('dailynews')
 sn = NewsAnalyze('sanook')
 nhk = NewsAnalyze('nhk')
 
-def zipf_all(publishers=[tr,dn,mc,sn,nhk]): # plot zipf of all publishers 
+def zipf_all(publishers=[tr,dn,mc,sn,nhk], rho=0): # plot zipf of all publishers 
     plt.style.use("ggplot")
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 2, 1)
     ax2 = fig.add_subplot(1, 2, 2)
     for p in publishers:
         p.load_freq()
-        cx, sx = range(1, len(p.wf1)+1), range(1, len(p.wf2)+1)
+        cx, sx = np.arange(1, len(p.wf1)+1)+rho, np.arange(1, len(p.wf2)+1)+rho
         ax1.plot(cx, p.wf1.iloc[:,1], label=p.publisher)
         ax2.plot(sx, p.wf2.iloc[:,1], label=p.publisher)
         p.release_memory()

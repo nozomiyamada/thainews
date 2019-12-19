@@ -181,8 +181,11 @@ NHK Thai: word frequency without stopwords
 ### 1.4 Relationship between vacabulary and text length
 ||R<sup>2</sup>|coefficient|intercept|
 |:-:|-:|-:|-:|
-|Sanook|0.939|0.695|1.200|
-|NHK Thai|0.882|0.759|0.767|
+|Thairath|0.959|0.769|0.339|
+|Dailynews|0.956|0.778|0.329|
+|Matichon|0.961|0.758|0.368|
+|Sanook|0.939|0.695|0.523|
+|NHK Thai|0.882|0.759|0.333|
 
 
 ## 2. Vectorization
