@@ -176,16 +176,22 @@ NHK Thai: word frequency without stopwords
 
 
 ### 1.3 Zipf's Law
+<a href="https://www.codecogs.com/eqnedit.php?latex=f(w)&space;=&space;\frac{c}{r^k}&space;\\\\&space;f(w)&space;=&space;\frac{c}{(r&plus;\rho)^k}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?f(w)&space;=&space;\frac{c}{r^k}&space;\\\\&space;f(w)&space;=&space;\frac{c}{(r&plus;\rho)^k}" title="f(w) = \frac{c}{r^k} \\\\ f(w) = \frac{c}{(r+\rho)^k}" /></a>
+
 ![wordfreq](https://user-images.githubusercontent.com/44984892/70882789-69308680-2003-11ea-8784-84006d04f8b1.png)
 
 ### 1.4 Relationship between vacabulary and text length
+<a href="https://www.codecogs.com/eqnedit.php?latex=V&space;=&space;L^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V&space;=&space;L^k" title="V = L^k" /></a>
+
 ![LR_tr](https://user-images.githubusercontent.com/44984892/71268711-26aed700-2380-11ea-997b-a4d57c92838c.png)
 ![LR_dn](https://user-images.githubusercontent.com/44984892/71268715-2a425e00-2380-11ea-9635-673702a6677f.png)
 ![LR_mc](https://user-images.githubusercontent.com/44984892/71268720-2ca4b800-2380-11ea-94a3-21b88ea21b32.png)
 ![LR_sn](https://user-images.githubusercontent.com/44984892/71268723-2f071200-2380-11ea-986e-bd8f3ed3b82b.png)
 ![LR_nhk](https://user-images.githubusercontent.com/44984892/71268725-32020280-2380-11ea-8d4d-43b8e790e78d.png)
 
-||R<sup>2</sup>|coefficient|intercept|
+result of linear regression (log10-log10 plot)
+
+||R<sup>2</sup>|coefficient *k*|intercept|
 |:-:|-:|-:|-:|
 |Thairath|0.959|0.769|0.339|
 |Dailynews|0.956|0.778|0.329|
