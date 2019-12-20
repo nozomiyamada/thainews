@@ -21,24 +21,24 @@
 
 1. Word/Document Frequency
     
-    >[1.1 top 50 words](11-top-50-words)
+    >[1.1 top 50 words](#11-top-50-words)
     
-    >1.2 bigram
+    >[1.2 bigram](#12-bigram)
 
-    >1.3 Zipf's Law
+    >[1.3 Zipf's Law](#13-zipfs-law)
     
-    >1.4 Relationship between vacabulary and text length
+    >[1.4 Relationship between vacabulary and text length](#14-relationship-between-vacabulary-and-text-length)
 
     >1.5 Mann–Whitney U-test
 
-    >1.6 χ<sup>2</sup> score
+    >[1.6 χ<sup>2</sup> score](#16-χ<sup>2</sup>-score)
 
     >1.7 tf-idf
 
     tf-idf weighting has many variations. -> [Stanford NLP](https://nlp.stanford.edu/IR-book/html/htmledition/document-and-query-weighting-schemes-1.html)
 
 2. Vectorization
-    > 2.1 word frequency vector (20 - 20000 dimension)
+    >[2.1 Cosine Similarity of Word Frequency Vector (20 - 20000 dimension)](#21-cosine-similarity-of-word-frequency-vector)
     
     > 2.2 doc2vec
 
@@ -187,6 +187,7 @@ NHK Thai: word frequency without stopwords
 |Sanook|0.939|0.695|0.523|
 |NHK Thai|0.882|0.759|0.333|
 
+### 1.6. χ<sup>2</sup> score
 
 ## 2. Vectorization
 

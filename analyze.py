@@ -5,6 +5,7 @@ import numpy as np
 import scipy as sp
 import pandas as pd
 from collections import Counter
+from scipy.stats import chi2_contingency
 from gensim.models import word2vec
 from gensim.models import KeyedVectors
 from sklearn.metrics import r2_score
@@ -237,6 +238,20 @@ def zipf_all(publishers=[tr,dn,mc,sn,nhk], rho=0): # plot zipf of all publishers
     ax2.set_xlim([1e0,1e7]); ax2.set_ylim([1e0,1e7])
     ax1.set_aspect('equal'); ax2.set_aspect('equal')
     fig.show()
+
+def chi_square(self, publishers=[tr,dn,mc,sn,nhk]):
+    chi_array = np.zeros((len(publishers), len(publishers)))
+    for i in range(len(publishers)):
+        publishers[i].load_freq()
+        for j in range(i+1, len(publishers)):
+            publishers[j].load_freq()
+            chi,_,_,_ = chi2_contingency(publishers[i].wf2['count'],publishers[j].wf2['count'])
+            chi_array[i][j] = chi
+            print(chi)
+            publishers[j].release_memory()
+        publishers[i].release_memory()
+    pub_names = [p.publisher for p in publishers]
+    print(pd.DataFrame(chi_array, index=pub_names,columns=pub_names))
 
 def freq_vec_sim(publishers=[tr,dn,mc,sn], nmax=10000, step=10, only_thai=True, plot=False, show_words=False):
     """
