@@ -193,11 +193,11 @@ result of linear regression (log10-log10 plot)
 
 ||R<sup>2</sup>|coefficient *k*|intercept|
 |:-:|-:|-:|-:|
-|Thairath|0.959|0.769|0.339|
-|Dailynews|0.956|0.778|0.329|
-|Matichon|0.961|0.758|0.368|
-|Sanook|0.939|0.695|0.523|
-|NHK Thai|0.882|0.759|0.333|
+|Thairath|0.959|0.769|2.183|
+|Dailynews|0.956|0.778|2.133|
+|Matichon|0.961|0.758|2.333|
+|Sanook|0.939|0.695|4.954|
+|NHK Thai|0.882|0.759|2.152|
 
 ### 1.6. χ<sup>2</sup> score
 
