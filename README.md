@@ -200,6 +200,15 @@ result of linear regression (log10-log10 plot)
 |NHK Thai|0.882|0.759|2.152|
 
 ### 1.6. χ<sup>2</sup> score
+χ<sup>2</sup> score of 7000 dimensions
+
+|| Thairath | Dailynews | Matichon | Sanook |
+|:-:|-:|-:|-:|-:|
+|Thairath | - | 4.87e+6 | 3.76e+06 |1.57e+06|
+|Dailynews  | - | - | 2.51e+06 |1.83e+06|
+|Matichon   | - | - | - | 1.37e+06 |
+|Sanook     | - | - | - | - |
+
 
 ## 2. Vectorization
 
