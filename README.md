@@ -21,7 +21,7 @@
 
 1. Word/Document Frequency
     
-    >1.1 top 50 words
+    >[1.1 top 50 words](11-top-50-words)
     
     >1.2 bigram
 
@@ -52,7 +52,7 @@
 
 ## 1. Word/Document Frequency
     
-### 1.1 top 50 words
+### 1.1 Top 50 words
 
 word frequency with stopwords
 
@@ -197,11 +197,11 @@ cosine similarity of frequency vectors of 7000 dimensions
 
 || Thairath | Dailynews | Matichon | Sanook | NHK Thai |
 |:-:|-:|-:|-:|-:|-:|
-|Thairath | - | 0.982269 | 0.958436 |0.868301  |0.486154|
-|Dailynews  | - | - | 0.976292  |0.865390  |0.523170|
-|Matichon   | - | - | - | 0.865427 |0.514641|
-|Sanook     | - | - | - | - | 0.430216|
-|NHK Thai   | - | - | - | - | - |
+|Thairath | 1 | 0.982269 | 0.958436 |0.868301  |0.486154|
+|Dailynews  | - | 1 | 0.976292  |0.865390  |0.523170|
+|Matichon   | - | - | 1 | 0.865427 |0.514641|
+|Sanook     | - | - | - | 1 | 0.430216|
+|NHK Thai   | - | - | - | - | 1 |
 
 ## 3. Entropy
 
