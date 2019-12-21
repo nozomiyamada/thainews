@@ -176,18 +176,49 @@ NHK Thai: word frequency without stopwords
 
 
 ### 1.3 Zipf's Law
+<a href="https://www.codecogs.com/eqnedit.php?latex=f(w)&space;=&space;\frac{c}{r^k}&space;\\\\&space;f(w)&space;=&space;\frac{c}{(r&plus;\rho)^k}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?f(w)&space;=&space;\frac{c}{r^k}&space;\\\\&space;f(w)&space;=&space;\frac{c}{(r&plus;\rho)^k}" title="f(w) = \frac{c}{r^k} \\\\ f(w) = \frac{c}{(r+\rho)^k}" /></a>
+
 ![wordfreq](https://user-images.githubusercontent.com/44984892/70882789-69308680-2003-11ea-8784-84006d04f8b1.png)
 
 ### 1.4 Relationship between vacabulary and text length
-||R<sup>2</sup>|coefficient|intercept|
+<a href="https://www.codecogs.com/eqnedit.php?latex=V&space;=&space;L^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?V&space;=&space;L^k" title="V = L^k" /></a>
+
+![LR_tr](https://user-images.githubusercontent.com/44984892/71268711-26aed700-2380-11ea-997b-a4d57c92838c.png)
+![LR_dn](https://user-images.githubusercontent.com/44984892/71268715-2a425e00-2380-11ea-9635-673702a6677f.png)
+![LR_mc](https://user-images.githubusercontent.com/44984892/71268720-2ca4b800-2380-11ea-94a3-21b88ea21b32.png)
+![LR_sn](https://user-images.githubusercontent.com/44984892/71268723-2f071200-2380-11ea-986e-bd8f3ed3b82b.png)
+![LR_nhk](https://user-images.githubusercontent.com/44984892/71268725-32020280-2380-11ea-8d4d-43b8e790e78d.png)
+
+result of linear regression (log10-log10 plot)
+
+||R<sup>2</sup>|coefficient *k*|intercept|
 |:-:|-:|-:|-:|
-|Thairath|0.959|0.769|0.339|
-|Dailynews|0.956|0.778|0.329|
-|Matichon|0.961|0.758|0.368|
-|Sanook|0.939|0.695|0.523|
-|NHK Thai|0.882|0.759|0.333|
+|Thairath|0.959|0.769|2.183|
+|Dailynews|0.956|0.778|2.133|
+|Matichon|0.961|0.758|2.333|
+|Sanook|0.939|0.695|4.954|
+|NHK Thai|0.882|0.759|2.152|
 
 ### 1.6. χ<sup>2</sup> score
+χ<sup>2</sup> score of 1000 frequent words
+
+|| Thairath | Dailynews | Matichon | Sanook |
+|:-:|-:|-:|-:|-:|
+|Thairath | - | 1.24e+6 | 1.05e+06 |0.56e+06|
+|Dailynews  | - | - | 0.59e+06 |0.63e+06|
+|Matichon   | - | - | - | 0.50e+06 |
+|Sanook     | - | - | - | - |
+
+
+χ<sup>2</sup> score of 10000 frequent words
+
+|| Thairath | Dailynews | Matichon | Sanook |
+|:-:|-:|-:|-:|-:|
+|Thairath | - | 3.58e+6 | 3.00e+06 |1.23e+06|
+|Dailynews  | - | - | 1.98e+06 |1.48e+06|
+|Matichon   | - | - | - | 1.16e+06 |
+|Sanook     | - | - | - | - |
+
 
 ## 2. Vectorization
 
