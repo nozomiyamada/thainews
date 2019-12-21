@@ -8,6 +8,8 @@ from collections import Counter
 from scipy.stats import chi2_contingency
 from gensim.models import word2vec
 from gensim.models import KeyedVectors
+from gensim.models.doc2vec import Doc2Vec
+from gensim.models.doc2vec import TaggedDocument
 from sklearn.metrics import r2_score
 from sklearn.linear_model import LinearRegression
 from pythainlp import word_tokenize as wt
@@ -37,7 +39,7 @@ class NewsAnalyze:
         self.publisher = publisher
         self.path = f'/Users/Nozomi/gdrive/scraping/{publisher}/'
         self.stop = corpus.thai_stopwords()
-        self.tokenized = glob.glob(self.path+'*tokenized.tsv') # list of tokenized file
+        self.tokenized = sorted(glob.glob(self.path+'*tokenized.tsv')) # list of tokenized file
 
     def tokenize(self, only_one=False):
         jsons = set(glob.glob(self.path + '*.json')) # all json files
@@ -209,6 +211,20 @@ class NewsAnalyze:
             result.append([N, V, round(N/V,2), entropy])
         return (pd.DataFrame(result, columns=['token','vocab','t/v','entropy'],
         index=['with stop with punct:', 'with stop w/o  punct:', 'w/o  stop with punct:', 'w/o  stop w/o  punct:']))
+
+    def make_w2v(self):
+        pass
+
+    def make_d2v(self,epoch=10):
+        for j, each_file in enumerate(self.tokenized):
+            with open(each_file,'r') as f:
+                if j == 0:
+                    self.trainings = [TaggedDocument(words = data.split(), tags = [i]) for i, data in enumerate(f)]
+                else:
+                    length_now = len(self.trainings)
+                    self.trainings += [TaggedDocument(words = data.split(), tags = [i+length_now]) for i, data in enumerate(f)]
+        model = Doc2Vec(documents=self.trainings, dm = 0, size=300, window=8, min_count=5, workers=4, epochs=epoch)
+        return model
 
 ### instantiation ###
 tr = NewsAnalyze('thairath')
