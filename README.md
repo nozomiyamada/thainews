@@ -200,6 +200,25 @@ result of linear regression (log10-log10 plot)
 |NHK Thai|0.882|0.759|2.152|
 
 ### 1.6. χ<sup>2</sup> score
+χ<sup>2</sup> score of 1000 frequent words
+
+|| Thairath | Dailynews | Matichon | Sanook |
+|:-:|-:|-:|-:|-:|
+|Thairath | - | 1.24e+6 | 1.05e+06 |0.56e+06|
+|Dailynews  | - | - | 0.59e+06 |0.63e+06|
+|Matichon   | - | - | - | 0.50e+06 |
+|Sanook     | - | - | - | - |
+
+
+χ<sup>2</sup> score of 10000 frequent words
+
+|| Thairath | Dailynews | Matichon | Sanook |
+|:-:|-:|-:|-:|-:|
+|Thairath | - | 3.58e+6 | 3.00e+06 |1.23e+06|
+|Dailynews  | - | - | 1.98e+06 |1.48e+06|
+|Matichon   | - | - | - | 1.16e+06 |
+|Sanook     | - | - | - | - |
+
 
 ## 2. Vectorization
 
