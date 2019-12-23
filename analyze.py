@@ -15,11 +15,11 @@ from sklearn.linear_model import LinearRegression
 from pythainlp import word_tokenize as wt
 from pythainlp import corpus
 
-def js(filepath):
+def js(filepath) -> list:
     with open(filepath, 'r') as f:
         return json.load(f)
 
-def trim(text:str):
+def clean(text:str) -> list:
     """
     teim text & tokenize
     """
@@ -31,14 +31,15 @@ def trim(text:str):
     text = re.sub(r'[\'\"‘’“”`\)\(]', '', text)
     return wt(text.strip(' '), keep_whitespace=False) 
 
-def cossim(v1, v2):
+def cossim(v1, v2) -> float:
     return np.dot(v1, v2) / np.linalg.norm(v1) / np.linalg.norm(v2)
+
+stopwords = corpus.thai_stopwords()
 
 class NewsAnalyze:
     def __init__(self, publisher:str): # publisher: thairath, matichon, dailynews, sanook, nhk
         self.publisher = publisher
         self.path = f'/Users/Nozomi/gdrive/scraping/{publisher}/'
-        self.stop = corpus.thai_stopwords()
         self.tokenized = sorted(glob.glob(self.path+'*tokenized.tsv')) # list of tokenized file
 
     def tokenize(self, only_one=False):
@@ -47,16 +48,16 @@ class NewsAnalyze:
         to_be_tokenized = jsons - tokenized_txt # untokenized json files
         for json_path in to_be_tokenized:
             save_name = json_path.split('.json')[0] + 'tokenized.tsv' # thairath01.json -> thairath01tokenized.tsv
-            lst = [trim(news_dic['article']) for news_dic in js(json_path)]
+            lst = [[each_dic['id']] + clean(each_dic['article']) for each_dic in js(json_path)]
             with open(save_name, 'w', encoding='utf-8') as f:
                 writer = csv.writer(f, delimiter='\t', lineterminator='\n')
                 writer.writerows(lst)
             if only_one:
                 return
 
-    def no_article(self):
-        self.num_article = sum(len(js(i)) for i in glob.glob(self.path + '*.json'))
-        print(f'No. of articles: {self.num_article}')
+    def get_no_article(self):
+        self.no_article = sum(len(js(i)) for i in glob.glob(self.path + '*.json'))
+        print(f'No. of articles: {self.no_article}')
 
     def period(self):
         jsons = set(glob.glob(self.path + '*.json')) # all json files
@@ -73,9 +74,9 @@ class NewsAnalyze:
         for t in self.tokenized:
             with open(t) as f:
                 for line in csv.reader(f, delimiter='\t'):
-                    for word in line:
+                    for word in line[1:]:
                         count1[str(word)] += 1
-                        if word not in self.stop:
+                        if word not in stopwords:
                             count2[str(word)] += 1
         # with stopwords
         df = pd.DataFrame(count1.most_common(),columns=['word','count'],index=None)
@@ -85,6 +86,7 @@ class NewsAnalyze:
         df.to_csv(self.path + 'wf_stop.csv',index=None)
 
     def make_df(self): # make document frequnecy for tf-idf
+        self.get_no_article()
         document_count = Counter()
         for each_file in self.tokenized:
             with open(each_file, encoding='utf-8') as f:
@@ -92,7 +94,8 @@ class NewsAnalyze:
                     word_set = set(document)
                     for word in word_set:
                         document_count[word] += 1
-        df = pd.DataFrame(document_count.most_common(),columns=['word','count'],index=None)
+        document_count = [(word, count, round(count*100/self.no_article, 2)) for word, count in document_count.most_common()]
+        df = pd.DataFrame(document_count, columns=['word','count','percentage'], index=None)
         df.to_csv(self.path + 'df.csv',index=None)
 
     def load_freq(self):
@@ -110,11 +113,34 @@ class NewsAnalyze:
         self.wf2 = pd.read_csv(self.path + 'wf_stop.csv', encoding='utf-8') # without stopwords
         self.df = pd.read_csv(self.path + 'df.csv', encoding='utf-8') # document frequency
 
+    def load_df(self):
+        df_table = pd.read_csv(self.path + 'df.csv', encoding='utf-8') # document frequency
+        self.df = {word:df/100 for word,df in zip(df_table['word'], df_table['percentage'])}
+
     def release_memory(self):
         self.wf1, self.wf2, self.df = [],[],[]
 
     def make_tfidf(self):
-        pass
+        """
+        tfidf = (1 + log10tf) * log10(N/df)
+
+        tfidf_dic is dictionary of dictionaries:
+        tfidf_dic = {
+            100:{'go':3.5, 'come':3.0,...}
+            101:{'go':3.0, 'come':2.0,...}
+            ,...
+        }
+        """
+        self.get_no_article()
+        self.load_df()
+        tfidf_dic = {} # dictionary of tf, key is article ID
+        for each_file in self.tokenized: # iterate files
+            with open(each_file) as f:
+                for line in csv.reader(f, delimiter='\t'): # iterate articles
+                    tf = Counter(line[1:])
+                    tfidf = {w:(1+np.log10(v)) * np.log10(1/self.df[w]) for w,v in tf.items()}
+                    tfidf_dic[line[0]] = sorted(tfidf.items(), key=lambda x:x[1], reverse=True)[:20]
+            return tfidf_dic
 
     def topn(self, n=50, delimiter=' '): # show top n words 
         self.load_freq()
@@ -128,7 +154,7 @@ class NewsAnalyze:
         only_th1 = [w for w in self.wf1.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
         only_th2 = [w for w in self.wf2.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
         only_th3 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w))][:n]
-        only_th4 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w)) and str(w) not in self.stop][:n]
+        only_th4 = [w for w in self.df.iloc[:3*n,0] if re.match(r'^[ก-๙][ก-๙ \.]*$', str(w)) and str(w) not in stopwords][:n]
         print(f'wf with stopwords\n{delimiter.join(only_th1)}\n')
         print(f'wf w/o stopwords\n{delimiter.join(only_th2)}\n')
         print(f'df with stopwords\n{delimiter.join(only_th3)}\n')
@@ -157,9 +183,9 @@ class NewsAnalyze:
         for each_file in self.tokenized:
             with open(each_file) as f:
                 for line in csv.reader(f, delimiter='\t'): # iterate articles
-                    if len(line) != 0:
-                        x = np.append(x, len(line))
-                        y = np.append(y, len(set(line)))
+                    if len(line[1:]) != 0:
+                        x = np.append(x, len(line[1:]))
+                        y = np.append(y, len(set(line[1:])))
         plt.figure(figsize=(5,5))
         plt.scatter(x, y, s=1)
         plt.title(f'vocabulary - text length : {self.publisher}')
@@ -184,7 +210,7 @@ class NewsAnalyze:
             with open(t) as f:
                 for line in csv.reader(f, delimiter='\t'): # iterate articles
                     for i in range(len(line)-n): # iterate words
-                        if any([(w in self.stop) or not re.match(r'^[A-zก-๙]', w) for w in line[i:i+n]]): # stop word or punct
+                        if any([(w in stopwords) or not re.match(r'^[A-zก-๙]', w) for w in line[i:i+n]]): # stop word or punct
                             continue
                         ngram_count[tuple(line[i:i+n])] += 1
         for tpl, count in ngram_count.most_common(topn):
@@ -219,12 +245,19 @@ class NewsAnalyze:
         for j, each_file in enumerate(self.tokenized):
             with open(each_file,'r') as f:
                 if j == 0:
-                    self.trainings = [TaggedDocument(words = data.split(), tags = [i]) for i, data in enumerate(f)]
+                    self.trainings = [TaggedDocument(words = line[1:], tags = [line[0]]) for line in csv.reader(f, delimiter='\t')]
                 else:
-                    length_now = len(self.trainings)
-                    self.trainings += [TaggedDocument(words = data.split(), tags = [i+length_now]) for i, data in enumerate(f)]
-        model = Doc2Vec(documents=self.trainings, dm = 0, size=300, window=8, min_count=5, workers=4, epochs=epoch)
+                    self.trainings += [TaggedDocument(words = line[1:], tags = [line[0]]) for line in csv.reader(f, delimiter='\t')]
+        model = Doc2Vec(documents=self.trainings, dm = 0, vector_size=300, window=8, min_count=5, workers=4, epochs=epoch)
         return model
+
+    def show_content(self, article_id):
+        if self.publisher == 'nhk':
+            for dic in js(self.path + 'nhk.json'):
+                if dic['id'] == str(article_id):
+                    print('Headline\n', dic['headline'], '\n')
+                    print('Article\n', dic['article'])
+                    return
 
 ### instantiation ###
 tr = NewsAnalyze('thairath')
