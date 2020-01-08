@@ -6,15 +6,15 @@ from bs4 import BeautifulSoup as BS
 if __name__ != '__main__':
     sys.exit()
 
-with open ('nhk/nhk.json', 'r') as f:
+with open ('nhk/nhk.json', 'r', encoding='utf-8') as f:
     ids = sorted(x['id'] for x in json.load(f))
     print('oldest ID: %s' % ids[0])
     print('newest ID: %s' % ids[-1])
     print(len(ids))
 
-def nhk_scrape():
+def nhk_scrape(n=1000):
     total_list = []
-    for i in range(int(ids[-1])+1, int(ids[-1])+1000):
+    for i in range(int(ids[-1])+1, int(ids[-1])+n):
         url = f"https://www3.nhk.or.jp/nhkworld/th/news/{i}/"
         response = requests.get(url)
         response.encoding='utf-8'
@@ -30,8 +30,8 @@ def nhk_scrape():
             dic['id'] = str(i)
             total_list.append(dic)
 
-    with open ('nhk/nhk_new.json', 'w') as f:
-        with open ('nhk/nhk.json', 'r') as g:
+    with open ('nhk/nhk_new.json', 'w', encoding='utf-8') as f:
+        with open ('nhk/nhk.json', 'r', encoding='utf-8') as g:
             old_list = json.load(g)
             for dic in total_list:
                 if dic not in old_list:
