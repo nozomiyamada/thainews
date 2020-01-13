@@ -3,14 +3,18 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from bs4 import BeautifulSoup as BS
 
+def show_data():
+    with open ('nhk/nhk.json', 'r', encoding='utf-8') as f:
+        global ids
+        ids = sorted(x['id'] for x in json.load(f))
+        print('oldest ID: %s' % ids[0])
+        print('newest ID: %s' % ids[-1])
+        print(len(ids), 'articles')
+
 if __name__ != '__main__':
     sys.exit()
-
-with open ('nhk/nhk.json', 'r', encoding='utf-8') as f:
-    ids = sorted(x['id'] for x in json.load(f))
-    print('oldest ID: %s' % ids[0])
-    print('newest ID: %s' % ids[-1])
-    print(len(ids))
+else:
+    show_data()
 
 def nhk_scrape(n=1000):
     total_list = []
@@ -42,3 +46,5 @@ def nhk_scrape(n=1000):
         os.remove('nhk/nhk.json')
         os.rename('nhk/nhk_new.json', 'nhk/nhk.json')
         shutil.copy('nhk/nhk.json', '/Users/Nozomi/gdrive/scraping/nhk')
+
+    show_data()
