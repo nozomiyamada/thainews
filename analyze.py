@@ -45,10 +45,11 @@ class NewsAnalyze:
     def tokenize(self, only_one=False):
         jsons = set(glob.glob(self.path + '*.json')) # all json files
         tokenized_txt = {f.split('tokenized')[0]+'.json' for f in glob.glob(self.path + '*tokenized.tsv')} # already tokenized file
-        to_be_tokenized = jsons - tokenized_txt # untokenized json files
+        to_be_tokenized = sorted(jsons - tokenized_txt) # untokenized json files
         for json_path in to_be_tokenized:
             save_name = json_path.split('.json')[0] + 'tokenized.tsv' # thairath01.json -> thairath01tokenized.tsv
-            lst = [[each_dic['id']] + clean(each_dic['article']) for each_dic in js(json_path)]
+            lst = [clean(each_dic['article']) for each_dic in js(json_path)]
+            # lst = [[each_dic['id']] + clean(each_dic['article']) for each_dic in js(json_path)] # with id
             with open(save_name, 'w', encoding='utf-8') as f:
                 writer = csv.writer(f, delimiter='\t', lineterminator='\n')
                 writer.writerows(lst)
