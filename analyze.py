@@ -37,23 +37,25 @@ def cossim(v1, v2) -> float:
 stopwords = corpus.thai_stopwords()
 
 class NewsAnalyze:
-    def __init__(self, publisher:str): # publisher: thairath, matichon, dailynews, sanook, nhk
+    def __init__(self, path:str, publisher:str): # publisher: thairath, matichon, dailynews, sanook, nhk
         self.publisher = publisher
-        self.path = f'/Users/Nozomi/gdrive/scraping/{publisher}/'
-        self.tokenized = sorted(glob.glob(self.path+'*tokenized.tsv')) # list of tokenized file
+        self.path = f'{path}/{publisher}/'
+        self.tokenized = sorted(glob.glob(self.path+'tokenized/*.tsv')) # list of tokenized file
 
-    def tokenize(self, only_one=False):
+    def tokenize(self, n=5):
         jsons = set(glob.glob(self.path + '*.json')) # all json files
-        tokenized_txt = {f.split('tokenized')[0]+'.json' for f in glob.glob(self.path + '*tokenized.tsv')} # already tokenized file
+        tokenized_txt = {f.replace('/tokenized/','/').split('tokenized')[0]+'.json' for f in self.tokenized} # already tokenized file
         to_be_tokenized = sorted(jsons - tokenized_txt) # untokenized json files
-        for json_path in to_be_tokenized:
+        for i, json_path in enumerate(sorted(to_be_tokenized)):
+            print('tokenizing', json_path.rsplit('/',1)[1])
             save_name = json_path.split('.json')[0] + 'tokenized.tsv' # thairath01.json -> thairath01tokenized.tsv
             lst = [clean(each_dic['article']) for each_dic in js(json_path)]
             # lst = [[each_dic['id']] + clean(each_dic['article']) for each_dic in js(json_path)] # with id
             with open(save_name, 'w', encoding='utf-8') as f:
                 writer = csv.writer(f, delimiter='\t', lineterminator='\n')
                 writer.writerows(lst)
-            if only_one:
+            shutil.move(save_name, self.path+'tokenized/')
+            if i == n-1:
                 return
 
     def get_no_article(self):
@@ -261,11 +263,11 @@ class NewsAnalyze:
                     return
 
 ### instantiation ###
-tr = NewsAnalyze('thairath')
-mc = NewsAnalyze('matichon')
-dn = NewsAnalyze('dailynews')
-sn = NewsAnalyze('sanook')
-nhk = NewsAnalyze('nhk')
+tr = NewsAnalyze('/Users/Nozomi/gdrive/scraping', 'thairath')
+mc = NewsAnalyze('/Users/Nozomi/gdrive/scraping','matichon')
+dn = NewsAnalyze('/Users/Nozomi/gdrive/scraping','dailynews')
+sn = NewsAnalyze('/Users/Nozomi/gdrive/scraping','sanook')
+nhk = NewsAnalyze('/Users/Nozomi/gdrive/scraping','nhk')
 
 def zipf_all(publishers=[tr,dn,mc,sn,nhk], rho=0): # plot zipf of all publishers 
     plt.style.use("ggplot")
