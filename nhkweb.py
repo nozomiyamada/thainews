@@ -1,5 +1,5 @@
 import pandas as pd
-import re, json, csv, requests, shutil
+import re, json, csv, requests, shutil, tqdm
 from bs4 import BeautifulSoup
 
 def remove_rt(text):
@@ -73,29 +73,30 @@ def easy(n=1000, reverse=False):
     with open('nhk/nhkwebeasy.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
         print('articles', len(data))
-        minid = int(data[0]['id'][1:-4]) # id: k10012200591000
-        maxid = int(data[-1]['id'][1:-4])
+    with open('nhk/nhkwebeasy.log', 'r') as f:
+        minid = min(int(f.readline()), int(data[0]['id'][1:-4]))
+        maxid = min(int(f.readline()), int(data[-1]['id'][1:-4]))
     
-    count = 1
     if reverse:
-        for i in range(minid-1, minid-n, -1):
-            print(f'{count}/{n}', end='\r')
-            result = scrape_easy_one(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
-            if result != None:
-                data.append(result)
-            count += 1
+        r = range(minid-1, minid-n-1, -1)
     else:
-        for i in range(maxid+1, maxid+n, +1):
-            print(f'{count}/{n}', end='\r')
-            result = scrape_easy_one(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
-            if result != None:
-                data.append(result)
-            count += 1
+        r = range(maxid+1, maxid+n+1, +1)
 
-    data = sorted(data, key=lambda x:x['id'])
-    with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
-    shutil.copy('nhk/nhkwebeasy.json', '/Users/Nozomi/gdrive/scraping/')
+    for i in tqdm.tqdm(r):
+        result = scrape_easy_one(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
+        if result != None:
+            data.append(result)
+            data = sorted(data, key=lambda x:x['id'])
+            with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+
+    if reverse:
+        with open('nhk/nhkwebeasy.log', 'w') as f:
+            f.write(f'{minid-n}\n{maxid}')
+    else:
+        with open('nhk/nhkwebeasy.log', 'w') as f:
+            f.write(f'{minid}\n{maxid+n}')
+    #shutil.copy('nhk/nhkwebeasy.json', '/Users/Nozomi/gdrive/scraping/')
 
 def normal(n=1000, reverse=False):
     # open json file
