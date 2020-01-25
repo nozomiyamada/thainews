@@ -1,4 +1,4 @@
-import requests, json, os, csv, re, sys, shutil
+import requests, json, os, csv, re, sys, shutil, tqdm
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from bs4 import BeautifulSoup as BS
@@ -18,7 +18,7 @@ else:
 
 def nhk_scrape(n=1000):
     total_list = []
-    for i in range(int(ids[-1])+1, int(ids[-1])+n):
+    for i in tqdm.tqdm(range(int(ids[-1])+1, int(ids[-1])+n)):
         url = f"https://www3.nhk.or.jp/nhkworld/th/news/{i}/"
         response = requests.get(url)
         response.encoding='utf-8'
