@@ -101,36 +101,36 @@ def easy(n=1000, reverse=False):
             f.write(f'{minid}\n{maxid+n}')
     #shutil.copy('nhk/nhkwebeasy.json', '/Users/Nozomi/gdrive/scraping/')
 
-def normal(n=1000, reverse=True):
+def normal(n=1000):
     # open json file
     with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
-        date = f.readline().strip()
+        date = int(f.readline().strip())
         ID = int(f.readline().strip())
         print(date, ID)
-    with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
+    with open('nhk/nhkweb19.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    if reverse:
-        r = range(ID, ID-n, -1)
-    else:
-        r = range(ID, ID+n, +1)
-    for i in tqdm.tqdm(r):
-        result = scrape_normal_one(f'https://www3.nhk.or.jp/news/html/{date}/k{i}1000.html')
+    endid = ID - n
+    count = 0
+    while ID > endid:
+        print(f'ID: {ID}', end='\r')
+        result = scrape_normal_one(f'https://www3.nhk.or.jp/news/html/{date}/k{ID}1000.html')
         if result != None:
-            pass
+            count = 0
+            if result not in data:
+                data.append(result)
+                data = sorted(data, key=lambda x:x['id'])
+                with open('nhk/nhkweb19.json', 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
+                with open('nhk/nhkweb.log', 'w') as f:
+                        f.write(f'{date}\n{ID-1}')
+            ID -= 1
         else:
-            continue
-            """
-            y = int(date[:4]); m = int(date[4:6]); d = int(date[6:])
-            newdate = datetime.date(y,m,d) - datetime.timedelta(1)
-            date = f'{newdate.year}{newdate.month}{newdate.day}' 
-            result = scrape_normal_one(f'https://www3.nhk.or.jp/news/html/{date}/k{i}1000.html')
-            """
-        if result not in data:
-            data.append(result)
-            data = sorted(data, key=lambda x:x['id'])
-            with open('nhk/nhkweb.json', 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=4, ensure_ascii=False)
-    
-    with open('nhk/nhkweb.log', 'w') as f:
-            f.write(f'{date}\n{i-1}')
+            count += 1
+            ID -= 1
+            if count > 30:
+                date = date-1
+                with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
+                    _ = f.readline().strip()
+                    ID = int(f.readline().strip())
+            
