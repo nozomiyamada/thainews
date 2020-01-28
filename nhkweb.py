@@ -1,6 +1,7 @@
 import pandas as pd
 import re, json, csv, requests, shutil, tqdm
 from bs4 import BeautifulSoup
+import datetime
 
 def remove_rt(text):
     return re.sub('<rt>.+?</rt>', '', text)
@@ -40,6 +41,8 @@ def scrape_easy_one(url_easy):
 
 def scrape_normal_one(url_normal):
     response = requests.get(url_normal, timeout=(15.0, 30.0))
+    if response.status_code != 200:
+        return None
     soup = BeautifulSoup(response.content.decode('utf-8'), "html.parser")
     json_data = json.loads(soup.find_all("script", type="application/ld+json")[-1].text)
     title = json_data['headline']
@@ -98,31 +101,36 @@ def easy(n=1000, reverse=False):
             f.write(f'{minid}\n{maxid+n}')
     #shutil.copy('nhk/nhkwebeasy.json', '/Users/Nozomi/gdrive/scraping/')
 
-def normal(n=1000, reverse=False):
+def normal(n=1000, reverse=True):
     # open json file
+    with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
+        date = f.readline().strip()
+        ID = int(f.readline().strip())
+        print(date, ID)
     with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-        print('articles', len(data))
-        minid = int(data[0]['id'][1:-4]) # id: k10012200591000
-        maxid = int(data[-1]['id'][1:-4])
-    
-    count = 1
-    if reverse:
-        for i in range(minid-1, minid-n, -1):
-            print(f'{count}/{n}', end='\r')
-            result = scrape_normal_one(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
-            if result != None:
-                data.append(result)
-            count += 1
-    else:
-        for i in range(maxid+1, maxid+n, +1):
-            print(f'{count}/{n}', end='\r')
-            result = scrape_normal_one(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
-            if result != None:
-                data.append(result)
-            count += 1
 
-    data = sorted(data, key=lambda x:x['id'])
-    with open('nhk/nhkweb.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
-    shutil.copy('nhk/nhkweb.json', '/Users/Nozomi/gdrive/scraping/')
+    if reverse:
+        r = range(ID, ID-n, -1)
+    else:
+        r = range(ID, ID+n, +1)
+    for i in tqdm.tqdm(r):
+        result = scrape_normal_one(f'https://www3.nhk.or.jp/news/html/{date}/k{i}1000.html')
+        if result != None:
+            pass
+        else:
+            continue
+            """
+            y = int(date[:4]); m = int(date[4:6]); d = int(date[6:])
+            newdate = datetime.date(y,m,d) - datetime.timedelta(1)
+            date = f'{newdate.year}{newdate.month}{newdate.day}' 
+            result = scrape_normal_one(f'https://www3.nhk.or.jp/news/html/{date}/k{i}1000.html')
+            """
+        if result not in data:
+            data.append(result)
+            data = sorted(data, key=lambda x:x['id'])
+            with open('nhk/nhkweb.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+    
+    with open('nhk/nhkweb.log', 'w') as f:
+            f.write(f'{date}\n{i-1}')
