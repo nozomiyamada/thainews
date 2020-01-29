@@ -134,7 +134,14 @@ def normal(n=1000):
                 with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
                     _ = f.readline().strip()
                     ID = int(f.readline().strip())
-            
+
+def join():
+    n = pd.read_json('nhk/nhkweb.json', encoding='utf-8')
+    e = pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8')
+    ids = set(e['id'].to_list()) & set(n['id'].to_list())
+    print(len(ids))
+    return pd.DataFrame([ [id, n[n['id']==id]['article'].tolist()[0], e[e['id']==id]['article_easy'].tolist()[0]] for id in ids], columns=['id','normal','easy'])
+
 def excel():
     pd.read_json('nhk/nhkweb.json', encoding='utf-8').to_excel('nhk/nhkweb.xlsx', encoding='utf-8', index=False)
     pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8').to_excel('nhk/nhkwebeasy.xlsx', encoding='utf-8', index=False)
