@@ -145,14 +145,19 @@ def join():
     e = pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8')
     ids = set(e['id'].to_list()) & set(n['id'].to_list())
     ids = sorted(ids)
-    with open('join.js', 'w', encoding='utf-8') as f:
+    with open('../nozomiyamada.github.io/js/nhk/join.js', 'w', encoding='utf-8') as f:
         data =  {id:{ 
         'normal':n[n['id']==id]['article'].tolist()[0],
         'easy':change_tag(e[e['id']==id]['article_easy'].tolist()[0]),
+        'date':n[n['id']==id]['datePublished'].tolist()[0].split('T')[0],
         'urlnormal':n[n['id']==id]['url'].tolist()[0],
         'urleasy':e[e['id']==id]['url_easy'].tolist()[0]
         } for id in ids}
         json.dump(data, f, indent=4, ensure_ascii=False)
+    with open('../nozomiyamada.github.io/js/nhk/join.js', 'r', encoding='utf-8') as f:
+        data = f.read()
+    with open('../nozomiyamada.github.io/js/nhk/join.js', 'w', encoding='utf-8') as f:
+        f.write('data = ' + data)
 
 def excel():
     pd.read_json('nhk/nhkweb.json', encoding='utf-8').to_excel('nhk/nhkweb.xlsx', encoding='utf-8', index=False)
