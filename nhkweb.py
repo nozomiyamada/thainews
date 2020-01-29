@@ -140,7 +140,14 @@ def join():
     e = pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8')
     ids = set(e['id'].to_list()) & set(n['id'].to_list())
     print(len(ids))
-    return pd.DataFrame([ [id, n[n['id']==id]['article'].tolist()[0], e[e['id']==id]['article_easy'].tolist()[0]] for id in ids], columns=['id','normal','easy'])
+    with open('join.json', 'w', encoding='utf-8') as f:
+        data = [ {'id':id, 
+        'normal':n[n['id']==id]['article'].tolist()[0],
+        'easy':e[e['id']==id]['article_easy'].tolist()[0],
+        'urlnormal':n[n['id']==id]['url'].tolist()[0],
+        'urleasy':e[e['id']==id]['url_easy'].tolist()[0]
+        } for id in ids]
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 def excel():
     pd.read_json('nhk/nhkweb.json', encoding='utf-8').to_excel('nhk/nhkweb.xlsx', encoding='utf-8', index=False)
