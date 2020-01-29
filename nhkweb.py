@@ -109,6 +109,7 @@ def normal(n=1000):
         print(date, ID)
     with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
+        print('articles', len(data))
 
     endid = ID + n
     count = 0
@@ -120,7 +121,7 @@ def normal(n=1000):
             if result not in data:
                 data.append(result)
                 data = sorted(data, key=lambda x:x['id'])
-                with open('nhk/nhkweb19.json', 'w', encoding='utf-8') as f:
+                with open('nhk/nhkweb.json', 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=4, ensure_ascii=False)
                 with open('nhk/nhkweb.log', 'w') as f:
                         f.write(f'{date}\n{ID+1}')
@@ -134,3 +135,7 @@ def normal(n=1000):
                     _ = f.readline().strip()
                     ID = int(f.readline().strip())
             
+
+def excel():
+    pd.read_json('nhk/nhkweb.json', encoding='utf-8').to_excel('nhk/nhkweb.xlsx', encoding='utf-8', index=False)
+    pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8').to_excel('nhk/nhkwebeasy.xlsx', encoding='utf-8', index=False)
