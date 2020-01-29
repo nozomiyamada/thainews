@@ -135,7 +135,6 @@ def normal(n=1000):
                     _ = f.readline().strip()
                     ID = int(f.readline().strip())
             
-
 def excel():
     pd.read_json('nhk/nhkweb.json', encoding='utf-8').to_excel('nhk/nhkweb.xlsx', encoding='utf-8', index=False)
     pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8').to_excel('nhk/nhkwebeasy.xlsx', encoding='utf-8', index=False)
