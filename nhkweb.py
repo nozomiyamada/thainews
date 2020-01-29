@@ -107,12 +107,12 @@ def normal(n=1000):
         date = int(f.readline().strip())
         ID = int(f.readline().strip())
         print(date, ID)
-    with open('nhk/nhkweb19.json', 'r', encoding='utf-8') as f:
+    with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    endid = ID - n
+    endid = ID + n
     count = 0
-    while ID > endid:
+    while ID < endid:
         print(f'ID: {ID}', end='\r')
         result = scrape_normal_one(f'https://www3.nhk.or.jp/news/html/{date}/k{ID}1000.html')
         if result != None:
@@ -123,13 +123,13 @@ def normal(n=1000):
                 with open('nhk/nhkweb19.json', 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=4, ensure_ascii=False)
                 with open('nhk/nhkweb.log', 'w') as f:
-                        f.write(f'{date}\n{ID-1}')
-            ID -= 1
+                        f.write(f'{date}\n{ID+1}')
+            ID += 1
         else:
             count += 1
-            ID -= 1
+            ID += 1
             if count > 30:
-                date = date-1
+                date = date+1
                 with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
                     _ = f.readline().strip()
                     ID = int(f.readline().strip())
