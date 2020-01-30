@@ -153,11 +153,17 @@ def join():
         'urlnormal':n[n['id']==id]['url'].tolist()[0],
         'urleasy':e[e['id']==id]['url_easy'].tolist()[0]
         } for id in ids}
-        json.dump(data, f, indent=4, ensure_ascii=False)
-    with open('../nozomiyamada.github.io/js/nhk/join.js', 'r', encoding='utf-8') as f:
-        data = f.read()
-    with open('../nozomiyamada.github.io/js/nhk/join.js', 'w', encoding='utf-8') as f:
-        f.write('data = ' + data)
+        jsonarray = 'data = ' + json.dumps(data, indent=4, ensure_ascii=False)
+        f.write(jsonarray)
+
+def add_old():
+    with open('/Users/Nozomi/jupyter/nhkweb.json', 'r', encoding='utf-8') as f:
+        data1 = json.load(f)
+    with open('./nhk/nhkweb.json', 'r', encoding='utf-8') as f:
+        data2 = json.load(f)
+    with open('./nhk/nhkweb.json', 'w', encoding='utf-8') as f:
+        data2 = sorted(data1 + data2, key=lambda x:x['id'])
+        json.dump(data2, f, indent=4, ensure_ascii=False)
 
 def excel():
     pd.read_json('nhk/nhkweb.json', encoding='utf-8').to_excel('nhk/nhkweb.xlsx', encoding='utf-8', index=False)
