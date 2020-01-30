@@ -157,13 +157,24 @@ def join():
         f.write(jsonarray)
 
 def add_old():
-    with open('/Users/Nozomi/jupyter/nhkweb.json', 'r', encoding='utf-8') as f:
+    with open('/Users/Nozomi/python_files/nhkweb.json', 'r', encoding='utf-8') as f:
         data1 = json.load(f)
     with open('./nhk/nhkweb.json', 'r', encoding='utf-8') as f:
         data2 = json.load(f)
     with open('./nhk/nhkweb.json', 'w', encoding='utf-8') as f:
         data2 = sorted(data1 + data2, key=lambda x:x['id'])
         json.dump(data2, f, indent=4, ensure_ascii=False)
+
+def duplicate():
+    with open('./nhk/nhkweb.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    newlist = []
+    for dic in data:
+        if dic not in newlist:
+            newlist.append(dic)
+    with open('./nhk/nhkweb.json', 'w', encoding='utf-8') as f:
+        data = sorted(newlist, key=lambda x:x['id'])
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 def excel():
     pd.read_json('nhk/nhkweb.json', encoding='utf-8').to_excel('nhk/nhkweb.xlsx', encoding='utf-8', index=False)
