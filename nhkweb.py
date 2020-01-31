@@ -1,5 +1,6 @@
 import pandas as pd
 import re, json, csv, requests, shutil, tqdm
+from collections import Counter
 from bs4 import BeautifulSoup
 import datetime
 
@@ -105,12 +106,13 @@ def normal(n=1000):
     # open json file
     with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
         date = int(f.readline().strip())
-        ID = int(f.readline().strip())
-        print(date, ID)
+        firstID = int(f.readline().strip())
+        print(date, firstID)
     with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
         print('articles', len(data))
 
+    ID, lastID = firstID, firstID
     endid = ID + n
     count = 0
     while ID < endid:
@@ -125,15 +127,14 @@ def normal(n=1000):
                     json.dump(data, f, indent=4, ensure_ascii=False)
                 with open('nhk/nhkweb.log', 'w') as f:
                         f.write(f'{date}\n{ID+1}')
+                lastID = ID
             ID += 1
         else:
             count += 1
             ID += 1
             if count > 30:
                 date = date+1
-                with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
-                    _ = f.readline().strip()
-                    ID = int(f.readline().strip())
+                ID = lastID
 
 def change_tag(text):
     text = re.sub(r'<(per|org|plc)>', r"<span class='\1'>", text)
@@ -149,11 +150,28 @@ def join():
         data =  {id:{ 
         'normal':n[n['id']==id]['article'].tolist()[0],
         'easy':change_tag(e[e['id']==id]['article_easy'].tolist()[0]),
+        'title':e[e['id']==id]['title_easy'].tolist()[0],
         'date':n[n['id']==id]['datePublished'].tolist()[0].split('T')[0],
         'urlnormal':n[n['id']==id]['url'].tolist()[0],
         'urleasy':e[e['id']==id]['url_easy'].tolist()[0]
         } for id in ids}
         jsonarray = 'data = ' + json.dumps(data, indent=4, ensure_ascii=False)
+        f.write(jsonarray)
+        # kanji frequency
+        n_count, e_count = Counter(), Counter()
+        n_total, e_total = 0, 0
+        for dic in data.values():
+            for ch in dic['normal']:
+                if 19968 <= ord(ch) <= 40912:
+                    n_count[ch] += 1
+                    n_total += 1
+            for ch in dic['easy']:
+                if 19968 <= ord(ch) <= 40912:
+                    e_count[ch] += 1
+                    e_total += 1
+        n_count = [[word, count, round(count/n_total*100, 6)] for word, count in n_count.most_common(100)]
+        e_count = [[word, count, round(count/n_total*100, 6)] for word, count in e_count.most_common(100)]
+        jsonarray = '\nrank_n = ' + json.dumps(n_count, indent=4, ensure_ascii=False) + '\nrank_e = ' + json.dumps(e_count, indent=4, ensure_ascii=False)
         f.write(jsonarray)
 
 def add_old():
