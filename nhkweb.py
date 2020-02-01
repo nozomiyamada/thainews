@@ -169,9 +169,10 @@ def join():
                 if 19968 <= ord(ch) <= 40912:
                     e_count[ch] += 1
                     e_total += 1
-        n_count = [[word, count, round(count/n_total*100, 6)] for word, count in n_count.most_common(100)]
-        e_count = [[word, count, round(count/n_total*100, 6)] for word, count in e_count.most_common(100)]
-        jsonarray = '\nrank_n = ' + json.dumps(n_count, indent=4, ensure_ascii=False) + '\nrank_e = ' + json.dumps(e_count, indent=4, ensure_ascii=False)
+        n_count = [[word, count, round(count/n_total*100, 6)] for word, count in n_count.most_common()]
+        e_count = [[word, count, round(count/n_total*100, 6)] for word, count in e_count.most_common()]
+        jsonarray = ';\nrank_n = ' + json.dumps(n_count, ensure_ascii=False) + ';\nrank_e = ' + json.dumps(e_count, ensure_ascii=False)
+        jsonarray = jsonarray + f';\ntotal_n = {n_total};\ntotal_e = {e_total}'
         f.write(jsonarray)
 
 def add_old():
