@@ -142,6 +142,9 @@ def change_tag(text):
     return text
 
 def join():
+    """
+    make .js file
+    """
     n = pd.read_json('nhk/nhkweb.json', encoding='utf-8')
     e = pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8')
     ids = set(e['id'].to_list()) & set(n['id'].to_list())
