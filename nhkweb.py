@@ -153,6 +153,7 @@ def join():
     ids = sorted(ids)
     normal = [dic for dic in normal if dic['id'] in ids]
     easy = [dic for dic in easy if dic['id'] in ids]
+    print(len(normal), len(easy))
 
     joined = [{
             'id':n['id'], 
