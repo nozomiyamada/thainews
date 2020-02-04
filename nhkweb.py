@@ -145,47 +145,60 @@ def join():
     """
     make .js file
     """
-    n = pd.read_json('nhk/nhkweb.json', encoding='utf-8')
-    e = pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8')
-    ids = set(e['id'].to_list()) & set(n['id'].to_list())
+    with open('nhk/nhkweb.json', encoding='utf-8') as f:
+        normal = json.load(f)
+    with open('nhk/nhkwebeasy.json', encoding='utf-8') as f:
+        easy = json.load(f)
+    ids = set(dic['id'] for dic in normal) & set(dic['id'] for dic in easy)
     ids = sorted(ids)
+    normal = [dic for dic in normal if dic['id'] in ids]
+    easy = [dic for dic in easy if dic['id'] in ids]
+
     with open('../nozomiyamada.github.io/js/nhk/join.js', 'w', encoding='utf-8') as f:
-        data =  {id:{ 
-        'normal':n[n['id']==id]['article'].tolist()[0],
-        'easy':change_tag(e[e['id']==id]['article_easy'].tolist()[0]),
-        'title':e[e['id']==id]['title_easy'].tolist()[0],
-        'date':n[n['id']==id]['datePublished'].tolist()[0].split('T')[0],
-        'urlnormal':n[n['id']==id]['url'].tolist()[0],
-        'urleasy':e[e['id']==id]['url_easy'].tolist()[0]
-        } for id in ids}
-        jsonarray = 'data = ' + json.dumps(data, indent=4, ensure_ascii=False)
+        joined = [{
+            'id':n['id'], 
+            'article_n':n['article'],
+            'article_e':change_tag(e['article_easy']),
+            'genre':n['genre'],
+            'title_n':n['title'],
+            'title_e':e['title_easy'],
+            'date':n['datePublished'].split('T')[0],
+            'urlnormal':n['url'],
+            'urleasy':e['url_easy']
+            } for n, e in zip(normal, easy)]
+        jsonarray = 'data = ' + json.dumps(joined, indent=4, ensure_ascii=False)
         f.write(jsonarray)
+
+    # make summary data as js file
+    with open('../nozomiyamada.github.io/js/nhk/data_summary.js', 'w', encoding='utf-8') as f:
+
+        # article number, category
+        category_count = Counter()
+        for dic in normal:
+            for genre in dic['genre']:
+                category_count[genre] += 1
+        jsonarray = f"article_number = {len(ids)};\n"
+        jsonarray += "category = " + json.dumps(category_count.most_common(), ensure_ascii=False) + ';\n'
+        f.write(jsonarray)
+
         # kanji frequency
         n_count, e_count = Counter(), Counter()
         n_total, e_total = 0, 0
-        for dic in data.values():
-            for ch in dic['normal']:
+        for dic in joined:
+            for ch in dic['article_n']:
                 if 19968 <= ord(ch) <= 40912:
                     n_count[ch] += 1
                     n_total += 1
-            for ch in dic['easy']:
+            for ch in dic['article_e']:
                 if 19968 <= ord(ch) <= 40912:
                     e_count[ch] += 1
                     e_total += 1
         n_count = [[word, count, round(count/n_total*100, 6)] for word, count in n_count.most_common()]
         e_count = [[word, count, round(count/n_total*100, 6)] for word, count in e_count.most_common()]
-        jsonarray = ';\nrank_n = ' + json.dumps(n_count, ensure_ascii=False) + ';\nrank_e = ' + json.dumps(e_count, ensure_ascii=False)
+        jsonarray = 'rank_n = ' + json.dumps(n_count, ensure_ascii=False) + ';\nrank_e = ' + json.dumps(e_count, ensure_ascii=False)
         jsonarray = jsonarray + f';\ntotal_n = {n_total};\ntotal_e = {e_total}'
         f.write(jsonarray)
 
-def add_old():
-    with open('/Users/Nozomi/python_files/nhkweb.json', 'r', encoding='utf-8') as f:
-        data1 = json.load(f)
-    with open('./nhk/nhkweb.json', 'r', encoding='utf-8') as f:
-        data2 = json.load(f)
-    with open('./nhk/nhkweb.json', 'w', encoding='utf-8') as f:
-        data2 = sorted(data1 + data2, key=lambda x:x['id'])
-        json.dump(data2, f, indent=4, ensure_ascii=False)
 
 def duplicate():
     with open('./nhk/nhkweb.json', 'r', encoding='utf-8') as f:
@@ -206,7 +219,3 @@ def get_link(start=0):
         if i not in n_list:
             notyet.append(i)
     return notyet
-
-def excel():
-    pd.read_json('nhk/nhkweb.json', encoding='utf-8').to_excel('nhk/nhkweb.xlsx', encoding='utf-8', index=False)
-    pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8').to_excel('nhk/nhkwebeasy.xlsx', encoding='utf-8', index=False)
