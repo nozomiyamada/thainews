@@ -154,8 +154,7 @@ def join():
     normal = [dic for dic in normal if dic['id'] in ids]
     easy = [dic for dic in easy if dic['id'] in ids]
 
-    with open('../nozomiyamada.github.io/js/nhk/join.js', 'w', encoding='utf-8') as f:
-        joined = [{
+    joined = [{
             'id':n['id'], 
             'article_n':n['article'],
             'article_e':change_tag(e['article_easy']),
@@ -166,8 +165,46 @@ def join():
             'urlnormal':n['url'],
             'urleasy':e['url_easy']
             } for n, e in zip(normal, easy)]
-        jsonarray = 'data = ' + json.dumps(joined, indent=4, ensure_ascii=False)
-        f.write(jsonarray)
+
+    # make article list of each category
+    # category = ['社会', '国際', 'ビジネス', 'スポーツ', '政治', '科学・文化', '暮らし', '地域', '気象・災害']
+    
+    # 社会
+    with open('../nozomiyamada.github.io/js/nhk/social.js', 'w', encoding='utf-8') as f:
+        article_data = [dic for dic in joined if '社会' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False))
+    # 国際
+    with open('../nozomiyamada.github.io/js/nhk/international.js', 'w', encoding='utf-8') as f:
+        article_data = [dic for dic in joined if '国際' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False) +';\n')
+    # ビジネス
+    with open('../nozomiyamada.github.io/js/nhk/business.js', 'w', encoding='utf-8') as f:
+        article_data = [dic for dic in joined if 'ビジネス' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False) +';\n')
+    # スポーツ
+    with open('../nozomiyamada.github.io/js/nhk/sport.js', 'w', encoding='utf-8') as f:
+        article_data = [dic for dic in joined if 'スポーツ' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False) +';\n')
+    # 政治
+    with open('../nozomiyamada.github.io/js/nhk/politic.js', 'w', encoding='utf-8') as f:
+        article_data = [dic for dic in joined if '政治' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False) +';\n')
+    # 科学
+    with open('../nozomiyamada.github.io/js/nhk/science.js', 'w', encoding='utf-8') as f:
+        article_data= [dic for dic in joined if '科学・文化' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False) +';\n')
+    # 暮らし
+    with open('../nozomiyamada.github.io/js/nhk/life.js', 'w', encoding='utf-8') as f:
+        article_data = [dic for dic in joined if '暮らし' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False) +';\n')
+    # 地域
+    with open('../nozomiyamada.github.io/js/nhk/local.js', 'w', encoding='utf-8') as f:
+        article_data = [dic for dic in joined if '地域' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False) +';\n')
+    # 気象
+    with open('../nozomiyamada.github.io/js/nhk/weather.js', 'w', encoding='utf-8') as f:
+        article_data = [dic for dic in joined if '気象・災害' in dic['genre']]
+        f.write('article_data = ' + json.dumps(article_data, indent=4, ensure_ascii=False) +';\n')
 
     # make summary data as js file
     with open('../nozomiyamada.github.io/js/nhk/data_summary.js', 'w', encoding='utf-8') as f:
