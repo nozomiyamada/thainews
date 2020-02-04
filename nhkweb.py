@@ -19,6 +19,11 @@ def retag(text):
     text = re.sub(r'{per}(.+?){/per}', r"<per>\1</per>", text)
     return text
 
+def remove_a(text):
+    text = re.sub(r'</?a.*?>', '', text)
+    text = re.sub(r'<span class="under">(\w+)</span>', r'\1', text)
+    return text
+
 def scrape_easy_one(url_easy):
     response = requests.get(url_easy, timeout=(15.0, 30.0))
     if response.status_code != 200:
@@ -27,14 +32,19 @@ def scrape_easy_one(url_easy):
     url_normal = soup.find('div', class_="link-to-normal").a.get('href')
     date = soup.find('p', class_="article-main__date").text[1:-1]
     title_easy = soup.find('h1', class_="article-main__title")
+    title_easy_ruby = ''.join([str(t) for t in title_easy.contents]).strip()
     title_easy = BeautifulSoup(remove_rt(str(title_easy)), "html.parser").text.strip()
     article_easy = soup.find('div', class_="article-main__body article-body")
     article_easy = BeautifulSoup(tag(remove_rt(str(article_easy))), "html.parser").text.strip()
-
+    article_easy_ruby = soup.find('div', class_="article-main__body article-body").find_all('p')
+    article_easy_ruby = '\n'.join([''.join([remove_a(str(l)) for l in p.contents]) for p in article_easy_ruby if p != []]).strip()
+    
     return {
         'id':url_easy.split('/')[-1].split('.html')[0],
         'title_easy':title_easy,
+        'title_easy_ruby':title_easy_ruby,
         'article_easy':retag(article_easy),
+        'article_easy_ruby':article_easy_ruby,
         'url_easy':url_easy,
         'url_normal':url_normal,
         'date_easy':date
@@ -158,10 +168,12 @@ def join():
     joined = [{
             'id':n['id'], 
             'article_n':n['article'],
-            'article_e':change_tag(e['article_easy']),
+            #'article_e':change_tag(e['article_easy']),
+            'article_e':e.get('article_easy_ruby', change_tag(e['article_easy'])),
             'genre':n['genre'],
             'title_n':n['title'],
             'title_e':e['title_easy'],
+            'title_e_ruby':e['title_easy_ruby'], 
             'date':n['datePublished'].split('T')[0],
             'urlnormal':n['url'],
             'urleasy':e['url_easy']
