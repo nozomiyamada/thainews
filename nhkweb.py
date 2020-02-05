@@ -160,9 +160,8 @@ def join():
     with open('nhk/nhkwebeasy.json', encoding='utf-8') as f:
         easy = json.load(f)
     ids = set(dic['id'] for dic in normal) & set(dic['id'] for dic in easy)
-    ids = sorted(ids)
-    normal = [dic for dic in normal if dic['id'] in ids]
-    easy = [dic for dic in easy if dic['id'] in ids]
+    normal = sorted([dic for dic in normal if dic['id'] in ids], key=lambda x:x['id'], reverse=True)
+    easy = sorted([dic for dic in easy if dic['id'] in ids], key=lambda x:x['id'], reverse=True)
     print(len(normal), len(easy))
 
     joined = [{
