@@ -6,6 +6,25 @@ HOW TO USE
 
 thairath(start_id, end_id)
 """
+def change_date_daily(date):
+    _,day,month,year,_,time,_ = date.split()
+    month = {
+        'มกราคม':'01',
+        'กุมภาพันธ์':'02',
+        'มีนาคม':'03',
+        'เมษายน':'04',
+        'พฤษภาคม':'05',
+        'มิถุนายน':'06',
+        'กรกฎาคม':'07',
+        'สิงหาคม':'08',
+        'กันยายน':'09',
+        'ตุลาคม':'10',
+        'พฤศจิกายน':'11',
+        'ธันวาคม':'12'}[month]
+    if len(day) == 1:
+        day = '0' + day 
+    return f'{int(year)-543}-{month}-{day}T{time.replace(".",":")}'
+
 
 class NewsScrape:
     def __init__(self, url:str, publisher:str):
@@ -64,14 +83,15 @@ class NewsScrape:
         description = content.find('p', class_='desc').text
         article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
         category = soup.find('ol', class_="breadcrumb").find_all('a')[-1].text
-        date = content.find('span', class_="date").text  
+        date = change_date_daily(content.find('span', class_="date").text) 
         dic = {
+            "id":article_id,
             "headline":headline,
             "description":description,
             "article":article,
             "date":date,
             "category":category,
-            "id":article_id
+            "url":article_url
             }
         return dic
 
