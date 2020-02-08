@@ -22,7 +22,7 @@ def change_date_daily(date):
         'พฤศจิกายน':'11',
         'ธันวาคม':'12'}[month]
     if len(day) == 1:
-        day = '0' + day 
+        day = '0' + day
     return f'{int(year)-543}-{month}-{day}T{time.replace(".",":")}'
 
 
@@ -34,7 +34,7 @@ class NewsScrape:
     def request(self, article_id:int):   
         request_url = self.url + str(article_id)
         try:
-            response = requests.get(request_url, timeout=(12.0, 20.0))
+            response = requests.get(request_url, timeout=(15.0, 30.0))
         except:
             return None, None
         if response.status_code != 200:
@@ -79,8 +79,8 @@ class NewsScrape:
         content = soup.find('article', id="news-article")
         if content == None:
             return None   
-        headline = content.find('h1', class_='title').text
-        description = content.find('p', class_='desc').text
+        headline = content.find('h1', class_='title').text.strip()
+        description = content.find('p', class_='desc').text.strip()
         article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
         category = soup.find('ol', class_="breadcrumb").find_all('a')[-1].text
         date = change_date_daily(content.find('span', class_="date").text) 
