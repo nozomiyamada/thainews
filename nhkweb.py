@@ -115,36 +115,23 @@ def normal_one_new(url_normal):
 
 ### scrape new articles ###
 
-def easy(n=1000, reverse=False):
+def easy(n=1000):
     # open json file
     with open('nhk/nhkwebeasy.json', 'r', encoding='utf-8') as f:
-        print('articles', len(json.load(f)))
-    with open('nhk/nhkwebeasy.log', 'r') as f:
-        minid = min(int(f.readline()), int(data[0]['id'][1:-4]))
-        maxid = min(int(f.readline()), int(data[-1]['id'][1:-4]))
-    if reverse:
-        r = range(minid-1, minid-n-1, -1)
-    else:
-        r = range(maxid+1, maxid+n+1, +1)
-
+        data = json.load(f)
+    print('articles', len(data))
+    lastid = int(data[-2]['id'][1:-4]) # get last article ID
+    r = range(lastid+1, lastid+n+1)
     for i in tqdm.tqdm(r):
         result = easy_one_new(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
         if result != None:
             data.append(result)
-            data = sorted(data, key=lambda x:x['id'])
-            with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=4, ensure_ascii=False)
+    data = sorted(data, key=lambda x:x['id'])
+    with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
-    if reverse:
-        with open('nhk/nhkwebeasy.log', 'w') as f:
-            f.write(f'{minid-n}\n{maxid}')
-    else:
-        with open('nhk/nhkwebeasy.log', 'w') as f:
-            f.write(f'{minid}\n{maxid+n}')
-    #shutil.copy('nhk/nhkwebeasy.json', '/Users/Nozomi/gdrive/scraping/')
-
-def normal(n=1000):
-    # open json file
+def normal(n=500, lastdate=None):
+    # scrape articles in one day
     with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
         date = int(f.readline().strip())
         firstID = int(f.readline().strip())
@@ -152,30 +139,25 @@ def normal(n=1000):
     with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
         print('articles', len(data))
+        lastid = int(data[-1]['id'][1:-4]) # get last article ID
+        if lastdate == None:
+            lastdate = int(data[-1]['url'].split('/')[-2])
 
-    ID, lastID = firstID, firstID
-    endid = ID + n
     count = 0
-    while ID < endid:
-        print(f'ID: {ID}', end='\r')
+    r = range(lastid+1, lastid+n+1)
+    for i in tqdm.tqdm(r):
         result = normal_one_new(f'https://www3.nhk.or.jp/news/html/{date}/k{ID}1000.html')
         if result != None:
             count = 0
             if result not in data:
                 data.append(result)
-                data = sorted(data, key=lambda x:x['id'])
-                with open('nhk/nhkweb.json', 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=4, ensure_ascii=False)
-                with open('nhk/nhkweb.log', 'w') as f:
-                        f.write(f'{date}\n{ID+1}')
-                lastID = ID
-            ID += 1
         else:
             count += 1
-            ID += 1
-            if count > 30:
-                date = date+1
-                ID = lastID
+        if count > 50:
+            break
+    data = sorted(data, key=lambda x:x['id'])
+    with open('nhk/nhkweb.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 def change_tag(text):
     text = re.sub(r'<(per|org|plc)>', r"<span class='\1'>", text)
@@ -281,15 +263,8 @@ def join():
 
 
 def duplicate():
-    with open('./nhk/nhkweb.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    newlist = []
-    for dic in data:
-        if dic not in newlist:
-            newlist.append(dic)
-    with open('./nhk/nhkweb.json', 'w', encoding='utf-8') as f:
-        data = sorted(newlist, key=lambda x:x['id'])
-        json.dump(data, f, indent=4, ensure_ascii=False)
+    print(pd.read_json('nhk/nhkweb.json')['id'].value_counts())
+    print(pd.read_json('nhk/nhkwebeasy.json')['id'].value_counts())
 
 def get_link(start=0):
     notyet = []
