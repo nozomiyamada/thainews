@@ -2,7 +2,10 @@ import pandas as pd
 import re, json, csv, requests, shutil, tqdm
 from collections import Counter
 from bs4 import BeautifulSoup
+from selenium import webdriver
 import datetime
+
+### functions for nhk web easy ###
 
 def remove_rt(text):
     return re.sub('<rt>.+?</rt>', '', text)
@@ -24,7 +27,7 @@ def remove_a(text):
     text = re.sub(r'<span class="under">(\w+)</span>', r'\1', text)
     return text
 
-def scrape_easy_one(url_easy):
+def easy_one_new(url_easy):
     response = requests.get(url_easy, timeout=(15.0, 30.0))
     if response.status_code != 200:
         return None
@@ -50,7 +53,34 @@ def scrape_easy_one(url_easy):
         'date_easy':date
     }
 
-def scrape_normal_one(url_normal):
+def easy_one_old(html):
+    soup = BeautifulSoup(html, "html.parser")
+    url_normal = soup.find('div', id="regularnews").a.get('href').split('/http://')[-1]
+    url_normal = 'http://' + url_normal
+    date = soup.find('p', id="newsDate").text[1:-1]
+    url_easy = soup.find('meta', attrs={'name':'shorturl'}).get('content')
+    title_easy = soup.find('div', id='newstitle').h2
+    title_easy_ruby = ''.join([str(t) for t in title_easy.contents]).strip()
+    title_easy = BeautifulSoup(remove_rt(str(title_easy)), "html.parser").text.strip()
+    article_easy = soup.find('div', id="newsarticle")
+    article_easy = BeautifulSoup(tag(remove_rt(str(article_easy))), "html.parser").text.strip()
+    article_easy_ruby = soup.find('div', id="newsarticle").find_all('p')
+    article_easy_ruby = '\n'.join([''.join([remove_a(str(l)) for l in p.contents]) for p in article_easy_ruby if p != []]).strip()
+    
+    return {
+        'id':url_easy.split('/')[-1].split('.html')[0],
+        'title_easy':title_easy,
+        'title_easy_ruby':title_easy_ruby,
+        'article_easy':retag(article_easy),
+        'article_easy_ruby':article_easy_ruby,
+        'url_easy':url_easy,
+        'url_normal':url_normal,
+        'date_easy':date
+    }
+
+### functions for nhk web normal ###
+
+def normal_one_new(url_normal):
     response = requests.get(url_normal, timeout=(15.0, 30.0))
     if response.status_code != 200:
         return None
@@ -82,22 +112,23 @@ def scrape_normal_one(url_normal):
         'dateModified':date_m
     }
 
+
+### scrape new articles ###
+
 def easy(n=1000, reverse=False):
     # open json file
     with open('nhk/nhkwebeasy.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        print('articles', len(data))
+        print('articles', len(json.load(f)))
     with open('nhk/nhkwebeasy.log', 'r') as f:
         minid = min(int(f.readline()), int(data[0]['id'][1:-4]))
         maxid = min(int(f.readline()), int(data[-1]['id'][1:-4]))
-    
     if reverse:
         r = range(minid-1, minid-n-1, -1)
     else:
         r = range(maxid+1, maxid+n+1, +1)
 
     for i in tqdm.tqdm(r):
-        result = scrape_easy_one(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
+        result = easy_one_new(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
         if result != None:
             data.append(result)
             data = sorted(data, key=lambda x:x['id'])
@@ -127,7 +158,7 @@ def normal(n=1000):
     count = 0
     while ID < endid:
         print(f'ID: {ID}', end='\r')
-        result = scrape_normal_one(f'https://www3.nhk.or.jp/news/html/{date}/k{ID}1000.html')
+        result = normal_one_new(f'https://www3.nhk.or.jp/news/html/{date}/k{ID}1000.html')
         if result != None:
             count = 0
             if result not in data:
