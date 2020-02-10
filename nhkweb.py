@@ -25,13 +25,12 @@ def retag(text):
 def remove_a(text):
     text = re.sub(r'</?a.*?>', '', text)
     text = re.sub(r'<span class="under">(\w+)</span>', r'\1', text)
-    return text
+    text = re.sub(r'<img.+?>(<br ?/?>)?', '', text)
+    text = re.sub(r'^<br ?/?>', '', text)
+    return text.strip()
 
-def easy_one_new(url_easy):
-    response = requests.get(url_easy, timeout=(15.0, 30.0))
-    if response.status_code != 200:
-        return None
-    soup = BeautifulSoup(response.content.decode('utf-8'), "html.parser")
+def easy_one_new(html, url_easy):
+    soup = BeautifulSoup(html, "html.parser")
     url_normal = soup.find('div', class_="link-to-normal").a.get('href')
     date = soup.find('p', class_="article-main__date").text[1:-1]
     title_easy = soup.find('h1', class_="article-main__title")
@@ -53,10 +52,20 @@ def easy_one_new(url_easy):
         'date_easy':date
     }
 
+def send_request(url):
+    response = requests.get(url)
+    if response.status_code != 200:
+        return None
+    else:
+        return response.text
+
 def easy_one_old(html):
     soup = BeautifulSoup(html, "html.parser")
-    url_normal = soup.find('div', id="regularnews").a.get('href').split('/http://')[-1]
-    url_normal = 'http://' + url_normal
+    url_normal = soup.find('div', id="regularnews").a.get('href')
+    if '/http://' in url_normal:
+        url_normal = 'http://' + url_normal.split('/http://')[-1]
+    else:
+        url_normal = 'https://' + url_normal.split('/https://')[-1]
     date = soup.find('p', id="newsDate").text[1:-1]
     url_easy = soup.find('meta', attrs={'name':'shorturl'}).get('content')
     title_easy = soup.find('div', id='newstitle').h2
@@ -123,30 +132,28 @@ def easy(n=1000):
     lastid = int(data[-2]['id'][1:-4]) # get last article ID
     r = range(lastid+1, lastid+n+1)
     for i in tqdm.tqdm(r):
-        result = easy_one_new(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html')
-        if result != None:
+        url = f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html'
+        html = send_request(url)
+        if html != None:
+            result = easy_one_new(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html', url)
             data.append(result)
     data = sorted(data, key=lambda x:x['id'])
     with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-def normal(n=500, lastdate=None):
+def normal(lastdate=None, n=300):
     # scrape articles in one day
-    with open('nhk/nhkweb.log', 'r', encoding='utf-8') as f:
-        date = int(f.readline().strip())
-        firstID = int(f.readline().strip())
-        print(date, firstID)
     with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-        print('articles', len(data))
         lastid = int(data[-1]['id'][1:-4]) # get last article ID
         if lastdate == None:
             lastdate = int(data[-1]['url'].split('/')[-2])
-
+    print('articles', len(data))
+    print('lastarticle', data[-1]['datePublished'])
     count = 0
     r = range(lastid+1, lastid+n+1)
-    for i in tqdm.tqdm(r):
-        result = normal_one_new(f'https://www3.nhk.or.jp/news/html/{date}/k{ID}1000.html')
+    for ID in tqdm.tqdm(r):
+        result = normal_one_new(f'https://www3.nhk.or.jp/news/html/{lastdate}/k{ID}1000.html')
         if result != None:
             count = 0
             if result not in data:
