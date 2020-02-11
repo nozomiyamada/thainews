@@ -54,10 +54,7 @@ def easy_one_new(html, url_easy):
 
 def send_request(url):
     response = requests.get(url)
-    if response.status_code != 200:
-        return None
-    else:
-        return response.text
+    return None if response.status_code != 200 else response.text
 
 def easy_one_old(html):
     soup = BeautifulSoup(html, "html.parser")
@@ -120,7 +117,6 @@ def normal_one_new(url_normal):
         'datePublished':date,
         'dateModified':date_m
     }
-
 
 ### scrape new articles ###
 
@@ -273,11 +269,12 @@ def duplicate():
     print(pd.read_json('nhk/nhkweb.json')['id'].value_counts())
     print(pd.read_json('nhk/nhkwebeasy.json')['id'].value_counts())
 
-def get_link(start=0):
+def get_link():
     notyet = []
     n_list = pd.read_json('nhk/nhkweb.json', encoding='utf-8')['url'].tolist()
-    df_e = pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8') 
-    for i in df_e['url_normal'][start:]:
-        if i not in n_list:
-            notyet.append(i)
-    return notyet
+    df_e = pd.read_json('nhk/nhkwebeasy.json', encoding='utf-8')
+    nolink = pd.read_csv('nhk/nolinknormal.txt',header=None)[0].tolist()
+    for link in df_e['url_normal']:
+        if link not in n_list and link not in nolink:
+            notyet.append(link)
+    return notyet[::-1]
