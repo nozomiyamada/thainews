@@ -1,0 +1,67 @@
+1581378088666	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-foreground" "-no-remote" "-profile" "/var/folders/11/c2p61qts52951q5sy1qzkdnh0000gn/T/rust_mozprofilewq0wHZ"
+1581378090007	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1581378090208	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1581378090208	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1581378090208	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1581378090208	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1581378092868	Marionette	INFO	Listening on port 52373
+1581378092908	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript error: https://web.archive.org/web/20171025220850js_/http://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript error: https://web.archive.org/web/20171025220850js_/http://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript error: https://web.archive.org/web/20180324190521js_/http://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://web.archive.org/web/20180325141846js_/http://www3.nhk.or.jp/common/nplayer/libs/browser-tvsdk/primetimemain.min.js, line 62: SyntaxError: "use asm" is only meaningful in the Directive Prologue of a function body
+JavaScript warning: https://web.archive.org/web/20180325141846js_/http://www3.nhk.or.jp/common/nplayer/libs/browser-tvsdk/primetimemain.min.js, line 70: SyntaxError: "use asm" is only meaningful in the Directive Prologue of a function body
+JavaScript error: https://web.archive.org/web/20180327030129js_/http://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180327063657js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180329134402js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180502030235js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180508234811js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180527020231js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180609090033js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180617013550js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180628235234js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180702221330js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180709030409js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20180711225611js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20171006030128js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript warning: https://web.archive.org/web/20181123035716js_/https://www3.nhk.or.jp/common/nplayer/libs/browser-tvsdk/primetimemain.min.js, line 62: SyntaxError: "use asm" is only meaningful in the Directive Prologue of a function body
+JavaScript warning: https://web.archive.org/web/20181123035716js_/https://www3.nhk.or.jp/common/nplayer/libs/browser-tvsdk/primetimemain.min.js, line 70: SyntaxError: "use asm" is only meaningful in the Directive Prologue of a function body
+1581382177301	Marionette	INFO	Stopped listening on port 52373
+1581436406824	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-foreground" "-no-remote" "-profile" "/var/folders/11/c2p61qts52951q5sy1qzkdnh0000gn/T/rust_mozprofileUmAF9q"
+1581436408125	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1581436408322	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1581436408323	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1581436408323	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1581436408323	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1581436411012	Marionette	INFO	Listening on port 49926
+1581436411058	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript error: https://web.archive.org/web/20170702085914/https://www3.nhk.or.jp/news/html/20170702/k10011038221000.html, line 218: ReferenceError: nol_showCmnHeader is not defined
+JavaScript error: https://web.archive.org/web/20170702085914/https://www3.nhk.or.jp/news/html/20170702/k10011038221000.html, line 328: ReferenceError: nol_showCmnFooter is not defined
+JavaScript error: https://web.archive.org/web/20170702085914js_/https://www3.nhk.or.jp/news/parts16/js/bc.js, line 1: ReferenceError: $ is not defined
+JavaScript error: https://web.archive.org/web/20170702085914js_/https://www3.nhk.or.jp/news/parts16/js/app.bundle-v2.js, line 1: ReferenceError: nol_getDeviceType is not defined
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript error: https://web.archive.org/web/20150304161152js_/http://www3.nhk.or.jp/news/js3/header.js?t=20150302, line 1: ReferenceError: sysHash is not defined
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js?v1.10.2, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+JavaScript warning: https://archive.org/includes/jquery-1.10.2.min.js, line 2: Using //@ to indicate sourceMappingURL pragmas is deprecated. Use //# instead
+1581471941741	Marionette	INFO	Stopped listening on port 49926
