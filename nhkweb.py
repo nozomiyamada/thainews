@@ -126,7 +126,8 @@ def easy(n=1000, lastid=None): # 1001227595
         data = json.load(f)
         print('articles', len(data))
     if lastid == None:
-        lastid = int(data[-2]['id'][1:-4]) # get last article ID
+        ids = [int(x['id'][1:-4]) for x in data] # list of article ID
+        lastid = max([ID for ID in ids if ID < 1001300000])
     r = range(lastid+1, lastid+n+1)
     for i in tqdm.tqdm(r):
         url = f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html'
