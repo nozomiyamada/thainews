@@ -54,7 +54,7 @@ def easy_one_new(html, url_easy):
 
 def send_request(url):
     response = requests.get(url)
-    return None if response.status_code != 200 else response.text
+    return None if response.status_code != 200 else response.content.decode('utf-8')
 
 def easy_one_old(html):
     soup = BeautifulSoup(html, "html.parser")
@@ -120,18 +120,19 @@ def normal_one_new(url_normal):
 
 ### scrape new articles ###
 
-def easy(n=1000):
+def easy(n=1000, lastid=None): # 1001227595
     # open json file
     with open('nhk/nhkwebeasy.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-    print('articles', len(data))
-    lastid = int(data[-2]['id'][1:-4]) # get last article ID
+        print('articles', len(data))
+    if lastid == None:
+        lastid = int(data[-2]['id'][1:-4]) # get last article ID
     r = range(lastid+1, lastid+n+1)
     for i in tqdm.tqdm(r):
         url = f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html'
         html = send_request(url)
         if html != None:
-            result = easy_one_new(f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html', url)
+            result = easy_one_new(html, url)
             data.append(result)
     data = sorted(data, key=lambda x:x['id'])
     with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
@@ -183,7 +184,6 @@ def join():
     joined = [{
             'id':n['id'], 
             'article_n':n['article'],
-            #'article_e':change_tag(e['article_easy']),
             'article_e':e.get('article_easy_ruby', change_tag(e['article_easy'])),
             'genre':n['genre'],
             'title_n':n['title'],
@@ -193,6 +193,7 @@ def join():
             'urlnormal':n['url'],
             'urleasy':e['url_easy']
             } for n, e in zip(normal, easy)]
+    joined = sorted(joined, key=lambda x:x['date'], reverse=True)
 
     # make article list of each category
     # category = ['社会', '国際', 'ビジネス', 'スポーツ', '政治', '科学・文化', '暮らし', '地域', '気象・災害']
