@@ -139,19 +139,18 @@ def easy(n=1000, lastid=None): # 1001227595
     with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-def normal(lastdate=None, n=300):
+def normal(lastdate, n=300):
     # scrape articles in one day
     with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-        lastid = int(data[-1]['id'][1:-4]) # get last article ID
-        if lastdate == None:
-            lastdate = int(data[-1]['url'].split('/')[-2])
+        ids = [int(x['id'][1:-4]) for x in data] # list of article ID
+        lastid = max([ID for ID in ids if ID < 1001300000])
     print('articles', len(data))
-    print('lastarticle', data[-1]['datePublished'])
+    print('last ID', lastid)
     count = 0
     r = range(lastid+1, lastid+n+1)
     for ID in tqdm.tqdm(r):
-        result = normal_one_new(f'https://www3.nhk.or.jp/news/html/{lastdate}/k{ID}1000.html')
+        result = normal_one_new(f'https://www3.nhk.or.jp/news/html/2020{lastdate}/k{ID}1000.html')
         if result != None:
             count = 0
             if result not in data:
