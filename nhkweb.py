@@ -90,33 +90,37 @@ def normal_one_new(url_normal):
     response = requests.get(url_normal, timeout=(15.0, 30.0))
     if response.status_code != 200:
         return None
-    soup = BeautifulSoup(response.content.decode('utf-8'), "html.parser")
-    json_data = json.loads(soup.find_all("script", type="application/ld+json")[-1].text)
-    title = json_data['headline']
-    date = json_data['datePublished']
-    date_m = json_data['dateModified']
-    genre = json_data['genre']
-    keywords = json_data['keywords']
-    article = soup.find('div', id="news_textbody").text
-    if soup.find_all('div', id="news_textmore") != []:
-        for textmore in soup.find_all('div', id="news_textmore"):
-            article += ('\n' + textmore.text)
-    if soup.find_all('div', class_="news_add") != []:
-        for newsadd in soup.find_all('div', class_="news_add"):
-            if newsadd.h3 != None:
-                newsadd.h3.extract()
-            article += ('\n' + newsadd.text)
-            
-    return {
-        'id':url_normal.split('/')[-1].split('.html')[0],
-        'title':title,
-        'article':article.strip(),
-        'genre':genre,
-        'keywords':keywords,
-        'url':url_normal,
-        'datePublished':date,
-        'dateModified':date_m
-    }
+    try:
+        soup = BeautifulSoup(response.content.decode('utf-8'), "html.parser")
+        json_data = json.loads(soup.find_all("script", type="application/ld+json")[-1].text)
+        title = json_data['headline']
+        date = json_data['datePublished']
+        date_m = json_data['dateModified']
+        genre = json_data['genre']
+        keywords = json_data['keywords']
+        article = soup.find('div', id="news_textbody").text
+        if soup.find_all('div', id="news_textmore") != []:
+            for textmore in soup.find_all('div', id="news_textmore"):
+                article += ('\n' + textmore.text)
+        if soup.find_all('div', class_="news_add") != []:
+            for newsadd in soup.find_all('div', class_="news_add"):
+                if newsadd.h3 != None:
+                    newsadd.h3.extract()
+                article += ('\n' + newsadd.text)
+                
+        return {
+            'id':url_normal.split('/')[-1].split('.html')[0],
+            'title':title,
+            'article':article.strip(),
+            'genre':genre,
+            'keywords':keywords,
+            'url':url_normal,
+            'datePublished':date,
+            'dateModified':date_m
+        }
+    except:
+        print(url_normal)
+        return None
 
 ### scrape new articles ###
 
@@ -150,7 +154,7 @@ def normal(lastdate, n=300):
     count = 0
     r = range(lastid+1, lastid+n+1)
     for ID in tqdm.tqdm(r):
-        result = normal_one_new(f'https://www3.nhk.or.jp/news/html/2020{lastdate}/k{ID}1000.html')
+        result = normal_one_new(f'https://www3.nhk.or.jp/news/html/{lastdate}/k{ID}1000.html')
         if result != None:
             count = 0
             if result not in data:
