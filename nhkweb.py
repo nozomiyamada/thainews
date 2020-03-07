@@ -119,7 +119,7 @@ def normal_one_new(url_normal):
             'dateModified':date_m
         }
     except:
-        print(url_normal)
+        print('Not Found:', url_normal)
         return None
 
 ### scrape new articles ###
