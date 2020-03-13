@@ -1,5 +1,6 @@
+import numpy as np
 import pandas as pd
-import re, json, csv, requests, shutil, tqdm
+import re, json, csv, requests, shutil, tqdm, glob
 from collections import Counter
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -268,7 +269,6 @@ def join():
         jsonarray = 'rank_n = ' + json.dumps(n_count, ensure_ascii=False) + ';\nrank_e = ' + json.dumps(e_count, ensure_ascii=False)
         jsonarray = jsonarray + f';\ntotal_n = {n_total};\ntotal_e = {e_total}'
         f.write(jsonarray)
-
 
 def duplicate():
     print(pd.read_json('nhk/nhkweb.json')['id'].value_counts())
