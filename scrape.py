@@ -81,7 +81,11 @@ class NewsScrape:
             return None   
         headline = content.find('h1', class_='title').text.strip()
         description = content.find('p', class_='desc').text.strip()
-        article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
+        if article_id >= 500000:
+            article = content.find('div', class_="entry textbox content-all").text
+            article = re.sub(r'googletag.cmd.push.*', '', article).strip()
+        else: 
+            article = '\n'.join([i.text for i in content.find('div', class_="entry textbox content-all").find_all('p') if i.text not in ['', '\xa0']])
         category = soup.find('ol', class_="breadcrumb").find_all('a')[-1].text
         date = change_date_daily(content.find('span', class_="date").text) 
         dic = {
