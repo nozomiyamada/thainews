@@ -85,47 +85,101 @@ def easy_one_old(html):
         'date_easy':date
     }
 
-### functions for nhk web normal ###
+######## functions for nhk web normal ########
 
-def normal_one_new(url_normal):
+def request_and_scrape(url_normal):
     response = requests.get(url_normal, timeout=(15.0, 30.0))
     if response.status_code != 200:
         return None
     try:
-        soup = BeautifulSoup(response.content.decode('utf-8'), "html.parser")
-        json_data = json.loads(soup.find_all("script", type="application/ld+json")[-1].text)
-        title = json_data['headline']
-        date = json_data['datePublished']
-        date_m = json_data['dateModified']
-        genre = json_data['genre']
-        keywords = json_data['keywords']
-        article = soup.find('div', id="news_textbody").text
-        if soup.find_all('div', id="news_textmore") != []:
-            for textmore in soup.find_all('div', id="news_textmore"):
-                article += ('\n' + textmore.text)
-        if soup.find_all('div', class_="news_add") != []:
-            for newsadd in soup.find_all('div', class_="news_add"):
-                if newsadd.h3 != None:
-                    newsadd.h3.extract()
-                article += ('\n' + newsadd.text)
-                
-        return {
-            'id':url_normal.split('/')[-1].split('.html')[0],
-            'title':title,
-            'article':article.strip(),
-            'genre':genre,
-            'keywords':keywords,
-            'url':url_normal,
-            'datePublished':date,
-            'dateModified':date_m
-        }
+        html = response.content.decode('utf-8')
+        return scrape_one_new(html, url_normal)
     except:
         print('Not Found:', url_normal)
         return None
 
-### scrape new articles ###
+### for new web normal ###
+def scrape_one_new(html, url):
+    soup = BeautifulSoup(html, "html.parser")
+    json_data = json.loads(soup.find_all("script", type="application/ld+json")[-1].text)
 
-def easy(n=1000, lastid=None): # 1001227595
+    # title, date, genre, keyword
+    title = json_data.get('headline', soup.find('span', class_='contentTitle').text)
+    date = json_data.get('datePublished', re.search(r'datetime:.*?(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})', str(html)).group(1))
+    date_m = json_data.get('dateModified', '')
+    genre = json_data.get('genre', [])
+    if genre == []:
+        genre = [k for k in soup.find('meta', attrs={'name':'keywords'}).get('content').split(',') if k not in ['NHK','ニュース', 'NHK NEWS WEB']]
+    keywords = json_data.get('keywords', [])
+    
+    # article: news_textbody > news_textmore > news_add (paragraph titles are h3)
+    article = soup.find('div', id="news_textbody").text
+    if soup.find_all('div', id="news_textmore") != []:
+        for textmore in soup.find_all('div', id="news_textmore"):
+            article += ('\n' + textmore.text)
+    if soup.find_all('div', class_="news_add") != []:
+        for newsadd in soup.find_all('div', class_="news_add"):
+            if newsadd.h3 != None:
+                newsadd.h3.extract()
+            article += ('\n' + newsadd.text)
+            
+    return {
+        'id':url.split('/')[-1].split('.html')[0],
+        'title':title.strip(),
+        'article':article.strip(),
+        'genre':genre,
+        'keywords':keywords,
+        'url':url,
+        'datePublished':date,
+        'dateModified':date_m
+    }
+
+### for old web normal ###
+def make_datetime_normal_old(hmd, time):
+    year, month, day = hmd[:4], hmd[4:6], hmd[6:]
+    hour, minute = time.split('時')
+    minute = minute.strip('分')
+    if len(hour) == 1:
+        hour = '0' + hour
+    if len(minute) == 1:
+        minute = '0' + minute
+    return f"{year}-{month}-{day}T{hour}:{minute}"
+
+def scrape_one_old(html, url):
+    soup = BeautifulSoup(html, "html.parser")
+
+    # title, date, genre, keyword
+    title = soup.find('span', class_="contentTitle").text.strip()
+    hmd_ = url.split('/')[-2]
+    time_ = soup.find('span', id="news_time").text
+    date = make_datetime_normal_old(hmd_, time_)
+    genre = [k for k in soup.find('meta', attrs={'name':'keywords'}).get('content').split(',') if k not in ['NHK','ニュース', 'NHK NEWS WEB','ＮＨＫ','ＮＨＫニュース','']]
+    
+    # article: news_textbody > news_textmore > news_add (paragraph titles are h3)
+    article = soup.find(['div','p'], id="news_textbody").text
+    if soup.find_all(['div','p'], id="news_textmore") != []:
+        for textmore in soup.find_all(['div','p'], id="news_textmore"):
+            article += ('\n' + textmore.text)
+    if soup.find_all(['div','p'], class_="news_add") != []:
+        for newsadd in soup.find_all(['div','p'], class_="news_add"):
+            if newsadd.h3 != None:
+                newsadd.h3.extract()
+            article += ('\n' + newsadd.text)
+            
+    return {
+        'id':url.split('/')[-1].split('.html')[0],
+        'title':title.strip(),
+        'article':article.strip(),
+        'genre':genre,
+        'keywords':[],
+        'url':url,
+        'datePublished':date,
+        'dateModified':""
+    }
+
+######## scrape new articles ########
+
+def easy(n=1000, lastid=None): # 1001232125
     # open json file
     with open('nhk/nhkwebeasy.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -144,9 +198,9 @@ def easy(n=1000, lastid=None): # 1001227595
     with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-def normal(lastdate, n=300):
+def normal(lastdate, n=300):  # lastdate = 20200301
     # scrape articles in one day
-    with open('nhk/nhkweb.json', 'r', encoding='utf-8') as f:
+    with open('nhk/nhkweb2020.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
         ids = [int(x['id'][1:-4]) for x in data] # list of article ID
         lastid = max([ID for ID in ids if ID < 1001300000])
@@ -155,7 +209,7 @@ def normal(lastdate, n=300):
     count = 0
     r = range(lastid+1, lastid+n+1)
     for ID in tqdm.tqdm(r):
-        result = normal_one_new(f'https://www3.nhk.or.jp/news/html/{lastdate}/k{ID}1000.html')
+        result = request_and_scrape(f'https://www3.nhk.or.jp/news/html/{lastdate}/k{ID}1000.html')
         if result != None:
             count = 0
             if result not in data:
@@ -165,8 +219,60 @@ def normal(lastdate, n=300):
         if count > 50:
             break
     data = sorted(data, key=lambda x:x['id'])
-    with open('nhk/nhkweb.json', 'w', encoding='utf-8') as f:
+    with open('nhk/nhkweb2020.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
+
+######## functions for clean ########
+# genre <> keywords
+def clean_genre(year):
+    with open(f'nhk/nhkweb{year}.json','r', encoding='utf-8') as f:
+        data = json.load(f)
+    category = ['社会', '国際', 'ビジネス', 'スポーツ', '政治', '科学・文化', '暮らし', '地域', '気象・災害']
+    for i, dic in enumerate(data):
+        newgenre = []
+        newkey = []
+        for j in dic['genre']:
+            if j in category:
+                newgenre.append(j)
+            elif j == "災害" or j == "気象":
+                newgenre.append('気象・災害')
+            elif j == "科学・医療" or j == "文化・エンタメ" or j == "科学":
+                newgenre.append('科学・文化')
+            elif j == "暮らし文化":
+                newgenre.append('暮らし')
+                newgenre.append('科学・文化')
+            elif j == "経済":
+                newgenre.append('ビジネス')
+            else:
+                newkey.append(j)
+        for j in dic['keywords']:
+            if j in category:
+                newgenre.append(j)
+            elif j == "科学・医療" or j == "文化・エンタメ" or j == "科学":
+                newgenre.append('科学・文化')
+            elif j == "暮らし文化":
+                newgenre.append('暮らし')
+                newgenre.append('科学・文化')
+            elif j == "災害" or j == "気象":
+                newgenre.append('気象・災害')
+            else:
+                newkey.append(j)
+        data[i]['genre'] = list(set(newgenre))
+        data[i]['keywords'] = list(set(newkey))
+
+    # save to json
+    with open(f'nhk/nhkweb{year}.json','w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
+    # print the number of genre
+    genre = Counter()
+    for dic in data:
+        for g in dic['genre']:
+            genre[g] += 1
+    print('articles: ', len(data))
+    print(genre.most_common())
+
+######## functions for make .js ########
 
 def change_tag(text):
     text = re.sub(r'<(per|org|plc)>', r"<span class='\1'>", text)
