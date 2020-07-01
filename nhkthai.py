@@ -45,6 +45,6 @@ def nhk_scrape(n=1000):
     if os.path.exists('nhk/nhk.json') and os.path.exists('nhk/nhk_new.json') and os.path.getsize('nhk/nhk_new.json') >= os.path.getsize('nhk/nhk.json'):
         os.remove('nhk/nhk.json')
         os.rename('nhk/nhk_new.json', 'nhk/nhk.json')
-        shutil.copy('nhk/nhk.json', '/Users/Nozomi/gdrive/scraping/nhk')
+        #shutil.copy('nhk/nhk.json', '/Users/Nozomi/gdrive/scraping/nhk')
 
     show_data()
