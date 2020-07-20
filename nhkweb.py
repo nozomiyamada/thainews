@@ -95,6 +95,8 @@ def request_and_scrape(url_normal):
         html = response.content.decode('utf-8')
         return scrape_one_new(html, url_normal)
     except:
+        import traceback
+        traceback.print_exc()
         print('Not Found:', url_normal)
         return None
 
