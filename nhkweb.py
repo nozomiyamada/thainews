@@ -8,9 +8,12 @@ import datetime
 
 ### functions for nhk web easy ###
 
-def remove_rt(text):
+# delete ruby
+# <ruby>地震<rt>じしん</rt></ruby> => <ruby>地震</ruby>
+def remove_rt(text): 
     return re.sub('<rt>.+?</rt>', '', text)
 
+# convert NER tag <span> => {org}
 def tag(text):
     text = re.sub(r'<span class="colorC">(.+?)</span>', r"{org}\1{/org}", text)
     text = re.sub(r'<span class="colorL">(.+?)</span>', r"{plc}\1{/plc}", text)
@@ -24,12 +27,13 @@ def retag(text):
     return text
 
 def remove_a(text):
-    text = re.sub(r'</?a.*?>', '', text)
-    text = re.sub(r'<span class="under">(\w+)</span>', r'\1', text)
-    text = re.sub(r'<img.+?>(<br ?/?>)?', '', text)
-    text = re.sub(r'^<br ?/?>', '', text)
+    text = re.sub(r'</?a.*?>', '', text)  # remove <a>
+    text = re.sub(r'<span class="under">(.+)</span>', r'\1', text)  # remove underline tag
+    text = re.sub(r'<img.+?>(<br ?/?>)?', '', text)  # remove img
+    text = re.sub(r'^<br ?/?>', '', text)  # remove <br>
     return text.strip()
 
+# scrape one article from html & url
 def easy_one_new(html, url_easy):
     soup = BeautifulSoup(html, "html.parser")
     url_normal = soup.find('div', class_="link-to-normal").a.get('href')
@@ -136,7 +140,7 @@ def scrape_one_new(html, url):
         'dateModified':date_m
     }
 
-### for old web normal ###
+########## for old web normal ##########
 def make_datetime_normal_old(hmd, time):
     year, month, day = hmd[:4], hmd[4:6], hmd[6:]
     hour, minute = time.split('時')
