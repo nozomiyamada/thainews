@@ -96,8 +96,8 @@ def request_and_scrape(url_normal):
     if response.status_code != 200:
         return None
     try:
-        html = response.content.decode('utf-8')
-        return scrape_one_new(html, url_normal)
+        response.encoding = 'utf8'
+        return scrape_one_new(response.text, url_normal)
     except:
         import traceback
         traceback.print_exc()
@@ -110,7 +110,7 @@ def scrape_one_new(html, url):
     json_data = json.loads(soup.find_all("script", type="application/ld+json")[-1].text)
 
     # title, date, genre, keyword
-    title = json_data.get('headline', soup.find('span', class_='contentTitle').text)
+    title = json_data.get('headline', soup.find('h1', class_='content--title').text)
     date = json_data.get('datePublished', re.search(r'datetime:.*?(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})', str(html)).group(1))
     date_m = json_data.get('dateModified', '')
     genre = json_data.get('genre', [])
@@ -118,15 +118,14 @@ def scrape_one_new(html, url):
         genre = [k for k in soup.find('meta', attrs={'name':'keywords'}).get('content').split(',') if k not in ['NHK','ニュース', 'NHK NEWS WEB']]
     keywords = json_data.get('keywords', [])
     
-    # article: news_textbody > news_textmore > news_add (paragraph titles are h3)
-    article = soup.find('div', id="news_textbody").text
-    if soup.find_all('div', id="news_textmore") != []:
-        for textmore in soup.find_all('div', id="news_textmore"):
+
+    # article: .content--summary > .content--summary-more > .body-title or .body-text
+    article = soup.select_one('.content--summary').text
+    if soup.find_all(['div','p'], class_="content--summary-more") != []:
+        for textmore in soup.find_all(['div','p'], class_="content--summary-more"):
             article += ('\n' + textmore.text)
-    if soup.find_all('div', class_="news_add") != []:
-        for newsadd in soup.find_all('div', class_="news_add"):
-            if newsadd.h3 != None:
-                newsadd.h3.extract()
+    if soup.find_all(['div','p'], class_=["body-title", "body-text"]) != []:
+        for newsadd in soup.find_all(['div','p'], class_=["body-title", "body-text"]):
             article += ('\n' + newsadd.text)
             
     return {
@@ -204,16 +203,20 @@ def easy(n=1000, lastid=None): # 1001232125
     with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-def normal(lastdate, n=300):  # lastdate = 20200301
+def normal(lastdate, n=300, reverse=False, lastid=None):  # lastdate = 20200301
     # scrape articles in one day
     with open('nhk/nhkweb2020.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
         ids = [int(x['id'][1:-4]) for x in data] # list of article ID
-        lastid = max([ID for ID in ids if ID < 1001300000])
+        if lastid == None:
+            lastid = max([ID for ID in ids if ID < 1001300000])
     print('articles', len(data))
     print('last ID', lastid)
     count = 0
-    r = range(lastid+1, lastid+n+1)
+    if not reverse:
+        r = range(lastid+1, lastid+n+1)
+    else:
+        r = range(lastid, lastid-n, -1)
     for ID in tqdm.tqdm(r):
         result = request_and_scrape(f'https://www3.nhk.or.jp/news/html/{lastdate}/k{ID}1000.html')
         if result != None:
