@@ -23,16 +23,19 @@ def nhk_scrape(n=1000):
         response = requests.get(url)
         response.encoding='utf-8'
         if response.status_code == 200:
-            dic = {}
-            soup = BS(response.text, "html.parser")
-            data = soup.find('script',type="application/ld+json")
-            data = json.loads(data.text)
-            dic['headline'] = data['headline']
-            dic['article'] = data['articleBody']
-            dic['date'] = data['datePublished']
-            dic['url'] = url
-            dic['id'] = str(i)
-            total_list.append(dic)
+            try:
+                dic = {}
+                soup = BS(response.text, "html.parser")
+                data = soup.find('script',type="application/ld+json")
+                data = json.loads(data.encode_contents())
+                dic['headline'] = data['headline']
+                dic['article'] = data['articleBody']
+                dic['date'] = data['datePublished']
+                dic['url'] = url
+                dic['id'] = str(i)
+                total_list.append(dic)
+            except:
+                print(url)
 
     with open ('nhk/nhk_new.json', 'w', encoding='utf-8') as f:
         with open ('nhk/nhk.json', 'r', encoding='utf-8') as g:
