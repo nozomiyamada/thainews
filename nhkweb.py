@@ -205,7 +205,7 @@ def easy(n=1000, lastid=None): # 1001232125
 
 def normal(lastdate, n=300, reverse=False, lastid=None):  # lastdate = 20200301
     # scrape articles in one day
-    with open('nhk/nhkweb2020.json', 'r', encoding='utf-8') as f:
+    with open('nhk/nhkweb2021.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
         ids = [int(x['id'][1:-4]) for x in data] # list of article ID
         if lastid == None:
@@ -228,7 +228,7 @@ def normal(lastdate, n=300, reverse=False, lastid=None):  # lastdate = 20200301
         if count > 50:
             break
     data = sorted(data, key=lambda x:x['id'])
-    with open('nhk/nhkweb2020.json', 'w', encoding='utf-8') as f:
+    with open('nhk/nhkweb2021.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 ######## functions for clean ########
