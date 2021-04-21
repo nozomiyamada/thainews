@@ -203,7 +203,7 @@ def easy(n=1000, lastid=None): # 1001232125
     with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-def normal(lastdate, n=300, reverse=False, lastid=None):  # lastdate = 20200301
+def normal(lastdate, n=400, reverse=False, lastid=None):  # lastdate = 20200301
     # scrape articles in one day
     with open('nhk/nhkweb2021.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
