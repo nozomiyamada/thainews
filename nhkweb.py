@@ -37,7 +37,6 @@ def remove_a(text):
 def easy_one_new(html, url_easy):
     soup = BeautifulSoup(html, "html.parser")
     url_normal = soup.find('div', class_="link-to-normal").a.get('href')
-    date = soup.find('p', class_="article-main__date").text[1:-1]
     title_easy = soup.find('h1', class_="article-main__title")
     title_easy_ruby = ''.join([str(t) for t in title_easy.contents]).strip()
     title_easy = BeautifulSoup(remove_rt(str(title_easy)), "html.parser").text.strip()
@@ -45,6 +44,9 @@ def easy_one_new(html, url_easy):
     article_easy = BeautifulSoup(tag(remove_rt(str(article_easy))), "html.parser").text.strip()
     article_easy_ruby = soup.find('div', class_="article-main__body article-body").find_all('p')
     article_easy_ruby = '\n'.join([''.join([remove_a(str(l)) for l in p.contents]) for p in article_easy_ruby if p != []]).strip()
+    date_easy = soup.find('p', class_="article-main__date").text[1:-1]
+    d = url_normal.split('/')[-2] 
+    date = f"{d[:4]}-{d[4:6]}-{d[6:]}" 
     
     return {
         'id':url_easy.split('/')[-1].split('.html')[0],
@@ -54,7 +56,8 @@ def easy_one_new(html, url_easy):
         'article_easy_ruby':article_easy_ruby,
         'url_easy':url_easy,
         'url_normal':url_normal,
-        'date_easy':date
+        'date': date,
+        'date_easy':date_easy
     }
 
 def send_request(url):
@@ -186,12 +189,12 @@ def scrape_one_old(html, url):
 
 def easy(n=1000, lastid=None): # 1001232125
     # open json file
-    with open('nhk/nhkwebeasy.json', 'r', encoding='utf-8') as f:
+    with open('nhk/nhkeasy.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-        print('articles', len(data))
+        print('articles:', len(data))
     if lastid == None:
-        ids = [int(x['id'][1:-4]) for x in data] # list of article ID
-        lastid = max([ID for ID in ids if ID < 1001300000])
+        lastid = int(data[-1]['id'][1:-4])
+        print('last ID:', lastid)
     r = range(lastid+1, lastid+n+1)
     for i in tqdm.tqdm(r):
         url = f'https://www3.nhk.or.jp/news/easy/k{i}1000/k{i}1000.html'
@@ -199,8 +202,8 @@ def easy(n=1000, lastid=None): # 1001232125
         if html != None:
             result = easy_one_new(html, url)
             data.append(result)
-    data = sorted(data, key=lambda x:x['id'])
-    with open('nhk/nhkwebeasy.json', 'w', encoding='utf-8') as f:
+    data = sorted(data, key=lambda x:x['date'])
+    with open('nhk/nhkeasy.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 def normal(lastdate, n=400, reverse=False, lastid=None):  # lastdate = 20200301
