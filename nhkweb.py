@@ -212,7 +212,7 @@ def normal(lastdate, n=400, reverse=False, lastid=None):  # lastdate = 20200301
         data = json.load(f)
         ids = [int(x['id'][1:-4]) for x in data] # list of article ID
         if lastid == None:
-            lastid = max([ID for ID in ids if ID < 1001300000])
+            lastid = max(ids)
     print('articles', len(data))
     print('last ID', lastid)
     count = 0
